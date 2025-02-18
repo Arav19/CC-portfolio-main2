@@ -52,19 +52,235 @@
 
     <!-- Your p5.js sketch code -->
     <script>
-      // Your p5.js sketch code goes here
-      function setup() {
-        createCanvas(800, 600);
-        background(255);
-        // Add your sketch code here
-      }
+     //Arav Tewari, Hallucinogenic Rabbit
 
-      function draw() {
-        // Example: Draw a moving ellipse
-        background(255);
-        fill(0);
-        ellipse(mouseX, mouseY, 50, 50);
-      }
+function setup() {
+  createCanvas(400, 400);  
+}
+
+function draw() {
+  
+  //BACKRGOUND---------------------------------------------------------------
+
+  let backR = map(mouseX, 0, width, 0, 200);  
+  let backG = map(mouseY, 0, height, 0, 100);  
+  let backB = map(mouseX, 0, width, 0, 200);  
+
+  background(backR, backG, backB); 
+  strokeWeight(0) ;
+  
+  
+  let sideR = map(mouseX, 0, width, 0, 200);  
+  let sideG = map(mouseY, 0, height, 10, 0);  
+  let sideB = map(mouseX, 0, width, 50,100);  
+
+  fill(sideR, sideG, sideB); 
+  
+  rect(0,0,80,400)
+  
+  rect(320,0,80,400)
+//-----------------------------------------------------------
+  
+    strokeWeight(4) ;
+
+  // Sun----------------------
+  fill(255, 186, 82);
+  ellipse(150,60,80,80);
+  
+    
+  //-----Cloud1----------------------------
+  strokeWeight(4) ;
+  fill(250)
+  ellipse(50,100,30,30);
+  
+  fill(250)
+  ellipse(100,100,50,50);
+  
+  fill(250)
+  ellipse(70,100,40,40);
+  
+  fill(250)
+  ellipse(120,100,30,30);
+  
+  fill(250)
+  ellipse(140,100,30,30);
+  
+  fill(250)
+  ellipse(95,80,50,50);
+  
+  // Cloud 2 -------------
+  fill(250)
+  ellipse(300,60,30,30);
+  
+  fill(250)
+  ellipse(340,60,50,50);
+  
+  fill(250)
+  ellipse(320,60,40,40);
+  
+  fill(250)
+  ellipse(280,60,20,20);
+  
+  fill(250)
+  ellipse(370,60,30,30);
+  
+  fill(250)
+  ellipse(350,50,50,50);
+  
+  strokeWeight(5)  
+  fill(207, 167, 130)
+  ellipse(175,340,20,20);  
+  
+  fill(207, 167, 130)
+  ellipse(225,340,20,20);  
+
+  // Mushrooms -------------------
+  fill(240, 220, 180); // stem
+  rect(300, 200, 20, 400, 10); 
+  
+  fill(255, 0, 0); 
+  arc(310, 209, 100, 100, PI, 0, CHORD); 
+  
+  fill(240, 220, 180); 
+  rect(70, 359, 20, 100, 10); 
+  
+  fill(255, 0, 0); 
+  arc(80, 370, 50, 50, PI, 0, CHORD); 
+  
+  fill(240, 220, 180); 
+  rect(330, 359, 20, 100, 10); 
+  
+  fill(255, 0, 0); 
+  arc(340, 370, 50, 50, PI, 0, CHORD); 
+  
+  fill(240, 220, 180); 
+  rect(80, 309, 20, 100, 10); 
+  
+  fill(255, 0, 0); 
+  arc(90, 320, 90, 100, PI, 0, CHORD); 
+  
+  // Mushroom Eyes -----------------------------------------------
+  fill(255);
+  ellipse(90,300,60,25);  
+
+  fill(0);
+  ellipse(90,300,10,10);
+
+  strokeWeight(0) ;
+  fill(255);
+  ellipse(93,298,5,5);
+  
+    strokeWeight(4) ;
+
+  
+  fill(255);
+  ellipse(310,185,60,25);  
+
+  fill(0);
+  ellipse(310,185,10,10);
+
+  strokeWeight(0) ;
+  fill(255);
+  ellipse(313,183,5,5);
+  
+  
+  //--------------Person Body-------------------------
+  strokeWeight(4) ;
+  fill(52, 100, 92)
+  rect(175,200,50,200) 
+  
+  fill(220)
+  rect(190,200,20,200) 
+  
+  fill(52, 100, 92)
+  rect(165,240,10,100) 
+  
+  fill(52, 100, 92)
+  rect(225,240,10,100) 
+  //---------------------------------------------
+  
+  // Face shape
+  let faceWidth = mouseX / 2 + 100;  
+  let faceHeight = mouseY / 2 + 100;
+  
+  // Face color from mouse 
+  let faceR = map(mouseX, 0, width, 200, 255);  
+  let faceG = map(mouseY, 0, height, 180, 220);  
+  let faceB = map(mouseX, 0, width, 150, 200);  
+  
+  // Face position
+  let faceX = width / 2;  
+  let faceY = height / 2;  
+  
+  
+  //EARS-----------------------------------
+  
+  let earWidth = 30;
+  let earHeight = 70;
+  
+  fill(186, 167, 138);  
+  
+    rect(faceX - faceWidth / 4, faceY - faceHeight/2 + 20, 20, -50, 100); 
+  
+    rect(faceX + faceWidth / 4-20, faceY - faceHeight/2 + 20, 20, -50, 100); 
+
+
+//DRAW FACE--->
+  
+  fill(faceR, faceG, faceB);  
+  ellipse(faceX, faceY, faceWidth, faceHeight);  
+
+  //-------------------------------EYES-------
+  strokeWeight(1)  
+
+  // Eyes Sizes
+  let eyeSizeA = 40;  
+  let eyeSizeB = 30;  
+  let eyeSizeC = 20;  
+  let eyeSizeD = 10;  
+  
+  //EYE DISTANCE
+
+  let eyeOffsetX = faceWidth / 4;  
+  
+  //DRAW EYES
+  
+  fill(0);  // Black of eye
+  ellipse(faceX - eyeOffsetX, faceY - faceHeight / 5, eyeSizeA);  // L
+  ellipse(faceX + eyeOffsetX, faceY - faceHeight / 5, eyeSizeA);  // R
+  
+  
+  fill(240);  // white of eyes
+  
+  ellipse(faceX + eyeOffsetX, faceY - faceHeight / 5, eyeSizeB);  // R
+  ellipse(faceX - eyeOffsetX, faceY - faceHeight / 5, eyeSizeB);  // L
+  
+  let eyeR = map(mouseX, 0, width, 100, 200);  
+  let eyeG = map(mouseY, 0, height, 200, 0);  
+  let eyeB = map(mouseX, 0, width, 500, 40);  
+  
+  fill(eyeR, eyeG, eyeB);  // Dynamic face color
+  ellipse(faceX - eyeOffsetX, faceY - faceHeight / 5, eyeSizeC);  // L
+  ellipse(faceX + eyeOffsetX, faceY - faceHeight / 5, eyeSizeC);  // R
+
+  fill(eyeR, eyeG, eyeB);  // Dynamic face color
+  ellipse(faceX - eyeOffsetX, faceY - faceHeight / 5, eyeSizeD);  // L
+  ellipse(faceX + eyeOffsetX, faceY - faceHeight / 5, eyeSizeD);  // R
+  
+  
+  //---------------MOUTH---------------------------------------------------------------
+  
+
+  let mouthWidth = faceWidth * 0.6;  // Width of mouth -- follows face with
+  let mouthHeight = mouseY / 10;  // Height 
+  let mouthY = faceY + faceHeight / 6;  // Position (Y axxis)
+
+  fill(0);  
+  rect(faceX - mouthWidth / 2, mouthY, mouthWidth, mouthHeight, 100); 
+  
+
+}
+
     </script>
   </body>
 </html>
