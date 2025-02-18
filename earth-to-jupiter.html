@@ -1,51 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earth to Jupiter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f4f4f4;
-        color: #333;
-        text-align: center;
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      main {
-        margin: 40px auto;
-        max-width: 800px;
-      }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+            text-align: center;
+            font-family: serif;
+        }
 
-      iframe {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        height: 600px;
-      }
+        h1 {
+            color: red;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
 
-      a {
-        display: inline-block;
-        margin-top: 20px;
-        color: #007BFF;
-        text-decoration: none;
-        font-size: 1.2em;
-      }
+        #p5-sketch {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-      a:hover {
-        text-decoration: underline;
-      }
+        a {
+            display: block;
+            text-decoration: none;
+            font-size: 18px;
+            color: black;
+            background: red;
+            padding: 10px 15px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        a:hover {
+            background: darkred;
+        }
     </style>
-  </head>
-  <body>
-    <main>
-      <h1>Earth to Jupiter</h1>
-      <iframe src="https://editor.p5js.org/arav42/full/cr845FeNS"></iframe>
-      <a href="index.html">Back to Home</a>
-    </main>
-  </body>
-</html>
+</head>
+<body>
 
+    <h1>Earth To Jupiter Clock</h1>
+    <div id="p5-sketch"></div>
+    <a href="index.html">Back to Home</a>
+
+    <script>
+
+      let earthTime = 0;
+let jupiterTime = 0;
+const JUPITER_TIME_DILATION = 2.4;
+let lastFrameTime = 0;
+let lastSyncPoint = 0;
+let rotationsSinceSync = { earth: 0, jupiter: 0 };
+let diameter = 250;
+const SYNC_INTERVAL = 300; // 300 seconds (5 minutes)
+
+function setup() {
+ let canvas = createCanvas(400, 400);
+   canvas.parent('p5-sketch'); // Attach canvas to the div
+  textAlign(CENTER, CENTER);
+  angleMode(DEGREES);
+  lastFrameTime = millis();
+}
+
+
+
+
+
+         
+function draw() {
+
+  let currentTime = millis();
+  let deltaTimeInSeconds = (currentTime - lastFrameTime) / 1000;
+  lastFrameTime = currentTime;
+  
+  earthTime += deltaTimeInSeconds;
+  jupiterTime += deltaTimeInSeconds * JUPITER_TIME_DILATION;
+  
+  updateRotationCounts();
+  
+  let earthSeconds = earthTime % 60;
+  let jupiterSeconds = jupiterTime % 60;
+  
+  background(20);
+  translate(width / 2, height / 2);
+  
+  drawSpiralClock(0, 0, earthSeconds, jupiterSeconds);
+  drawSyncIndicator(0, height / 2 - 40);
+  drawMarathonCircle();
+}
+
+function updateRotationCounts() {
+  if (earthTime >= 60) {
+    rotationsSinceSync.earth++;
+    earthTime -= 60;
+  }
+  if (jupiterTime >= 60) {
+    rotationsSinceSync.jupiter++;
+    jupiterTime -= 60;
+  }
+  
+  // Check for exact sync at 0°
+  let earthAngle = (earthTime % SYNC_INTERVAL) / SYNC_INTERVAL * 360;
+  let jupiterAngle = (jupiterTime % (SYNC_INTERVAL / JUPITER_TIME_DILATION)) / (SYNC_INTERVAL / JUPITER_TIME_DILATION) * 360;
+  
+  if (earthAngle === 0 && jupiterAngle === 0 && millis() > 1000) {
+    lastSyncPoint = millis();
+  }
+}
+
+function drawSpiralClock(x, y, earthSeconds, jupiterSeconds) {
+  // Draw degree markers (every 15 degrees)
+  noFill();
+  stroke(70);
+  strokeWeight(2);
+  ellipse(x, y, diameter + 40);
+  
+  for (let angle = 0; angle < 360; angle += 15) {
+    push();
+    rotate(angle - 90); // Rotate so 0° is at the top
+    let markerLength = angle % 90 === 0 ? 20 : 
+                      angle % 45 === 0 ? 15 : 10;
+    
+    stroke(angle % 90 === 0 ? color(150) : 
+           angle % 45 === 0 ? color(100) : color(70));
+    strokeWeight(angle % 90 === 0 ? 2 : 1);
+    
+    // Draw markers on the outside
+    line(diameter / 2 + 20, 0, diameter / 2 + 20 + markerLength, 0);
+    
+    // Draw degree numbers
+    if (angle % 30 === 0) {
+      noStroke();
+      fill(150);
+      textSize(12);
+      push();
+      translate(diameter / 2 + 50, 0); // Move numbers further outside
+      rotate(-angle + 90); // Rotate numbers to be upright
+      text(angle + "°", 0, 0);
+      pop();
+    }
+    pop();
+  }
+  
+  // Draw spiral dots
+  for (let hour = 1; hour <= 24; hour++) {
+    let angle = map(hour, 1, 24, 0, 360);
+    let spiralRadius = map(hour, 1, 24, diameter / 6, diameter / 2);
+    let xPos = spiralRadius * cos(angle - 90);
+    let yPos = spiralRadius * sin(angle - 90);
+    
+    // Draw dot
+    noStroke();
+    fill(100);
+    ellipse(xPos, yPos, 6);
+    
+    // Draw hour label
+    if (hour % 2 === 0) { // Only label every 2 hours to reduce overlap
+      let labelAngle = angle - 90;
+      let labelRadius = spiralRadius + 20; // Move labels outward slightly
+      let labelX = labelRadius * cos(labelAngle);
+      let labelY = labelRadius * sin(labelAngle);
+      
+      // Draw label background
+      fill(20);
+      noStroke();
+      rectMode(CENTER);
+      rect(labelX, labelY - 10, 45, 18, 4);
+      
+      // Draw hour number
+      fill(200);
+      textSize(12);
+      let hourStr = hour.toString().padStart(2, '0') + "00";
+      text(hourStr, labelX, labelY - 10);
+    }
+  }
+  
+  // Draw hands
+  let earthHandLength = map(earthSeconds, 0, 60, diameter / 6, diameter / 2);
+  let jupiterHandLength = map(jupiterSeconds, 0, 60, diameter / 6, diameter / 2);
+  
+  // Earth hand (green)
+  drawHand(x, y, earthSeconds, earthHandLength * 2, color(0, 255, 0, 200));
+  
+  // Jupiter hand (orange)
+  drawHand(x, y, jupiterSeconds, jupiterHandLength * 2, color(255, 140, 0, 200));
+  
+  // Center point
+  fill(255);
+  noStroke();
+  ellipse(x, y, 6);
+}
+
+function drawHand(x, y, seconds, length, handColor) {
+  push();
+  let angle = (seconds / 60) * 360;
+  rotate(angle - 90); // Rotate so 0° is at the top
+  stroke(handColor);
+  strokeWeight(3);
+  line(0, 0, length / 2, 0);
+  fill(handColor);
+  noStroke();
+  ellipse(length / 2, 0, 6);
+  pop();
+}
+
+function drawSyncIndicator(x, y) {
+  // Sync indicator light
+  noStroke();
+  let timeSinceSync = (millis() - lastSyncPoint) / 1000;
+  let syncAlpha = map(timeSinceSync, 0, 5, 255, 0);
+  
+  push();
+  translate(0, 350);
+  fill(255, syncAlpha);
+  ellipse(x, y, 8);
+  textSize(12);
+  fill(150);
+  text(`${rotationsSinceSync.earth}:${rotationsSinceSync.jupiter}`, x, y + 20);
+  pop();
+}
+
+function drawMarathonCircle() {
+  // Draw the marathon circle (sync indicator ring)
+  let timeSinceSync = (millis() - lastSyncPoint) / 1000;
+  let syncProgress = (timeSinceSync % SYNC_INTERVAL) / SYNC_INTERVAL;
+  
+  noFill();
+  stroke(255, 100);
+  strokeWeight(8);
+  // Draw the progress arc
+  arc(
+    0, 0, 
+    diameter + 80, diameter + 80, 
+    -90, // Start at top (0°)
+    -90 + 360 * syncProgress // End based on sync progress
+  );
+}
+ 
+    </script>
+
+</body>
+</html>
