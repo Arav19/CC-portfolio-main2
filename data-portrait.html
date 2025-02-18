@@ -1,51 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Portrait</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f4f4f4;
-        color: #333;
-        text-align: center;
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      main {
-        margin: 40px auto;
-        max-width: 800px;
-      }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+            text-align: center;
+            font-family: serif;
+        }
 
-      iframe {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        height: 600px;
-      }
+        h1 {
+            color: red;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
 
-      a {
-        display: inline-block;
-        margin-top: 20px;
-        color: #000000;
-        text-decoration: none;
-        font-size: 1.2em;
-      }
+        #p5-sketch {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-      a:hover {
-        text-decoration: underline;
-      }
+        a {
+            display: block;
+            text-decoration: none;
+            font-size: 18px;
+            color: black;
+            background: red;
+            padding: 10px 15px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        a:hover {
+            background: darkred;
+        }
     </style>
-  </head>
-  <body>
-    <main>
-      <h1>Data Portrait</h1>
-      <iframe src="https://editor.p5js.org/arav42/full/p6b6AHcQy"></iframe>
-            <a href="index.html">Back to Home</a>
-    </main>
-  </body>
-</html>
+</head>
+<body>
 
+    <h1>Data Portrait</h1>
+    <div id="p5-sketch"></div>
+    <a href="index.html">Back to Home</a>
+
+    <script>
+      
+  let shapes = [];//the array to store the walking rutine shapes in
+let currentShape = 0;//to refrence shape selected
+let scaleFactor = 1;//to refrence breathing effect
+let switchInterval = 10; //speed of breathing effect
+let days = ['• Saturday', '• Sunday', '• Monday', '• Tuesday', '• Wednesday', '• Thursday', '• Friday']; //calendwer refrence array
+
+function setup() {
+    et canvas = createCanvas(400, 400);
+  canvas.parent('p5-sketch'); // Attach canvas to the div
+  textAlign(RIGHT,TOP); // Align text to the right and top
+  textSize(10);
+  textFont('veranda'); 
+  
+  // The array wich stores the vertex points for the street shapes
+  shapes = [
+    [[50.24, 90.71], [45.37, 3.43], [5.67, 169], [48.37, 172.75], [54.49, 186.24], [33.11, 184.74], [27.77, 184.36], [5.67, 173.12], [28.14, 230.44], [45.37, 230.44], [39.41, 176.87], [49.49, 132.29], [25.52, 42.39], [0.51, 160.39], [18.4, 234.56], [27.5, 234.56]],
+    [[74.59, 236.05], [20.34, 180.14], [38.73, 131.62], [34.16, 65.86], [47.47, 59.53], [79.52, 62.35], [55.57, 99.22], [39.78, 123.53], [30.99, 121.42], [75.3, 64.46], [81.27, 67.27], [54.9, 96.45], [1.1, 2.92], [18.33, 87.66], [25.72, 175.22], [38.38, 173.81], [49.63, 182.25], [24.31, 176.98], [35.56, 223.04]],
+    [[78.85, 28.27], [2.82, 149.15], [5.34, 143.71], [70.44, 3.39], [39.26, 41.58], [24.54, 13.91], [28.4, 3.39], [31.9, 12.5], [2.82, 143.54], [32.6, 45.09], [2.82, 166.66], [10.01, 212.21], [70.79, 216.07], [72.89, 226.23], [65.88, 226.23], [0.37, 155.8]],
+    [[53.05, 215.15], [47.1, 197.28], [4, 136.67], [21.17, 9.84], [31.33, 2.48], [2.25, 0.64], [19.42, 10.19], [4.35, 5.63], [0.5, 133.86]],
+    [[76.91, 219.6], [79.36, 184.22], [11.04, 157.24], [5.79, 148.83], [17.7, 154.09], [60.8, 4.83], [5.79, 13.59], [24.01, 0.54], [42.58, 4.83], [0.53, 12.19], [10.69, 148.13]],
+    [[57.34, 200.16], [71.71, 51.25], [0.58, 167.93], [8.66, 181.59], [3.04, 5.01], [67.5, 49.85], [14.95, 0.36], [67.24, 53.18], [57.34, 200.16]],
+    [[27.88, 204.05], [50.21, 183.56], [44.17, 6.71], [30.04, 54.4], [13.86, 108.98], [5.54, 137.05], [42.86, 167.79], [46.54, 181.72], [9.22, 107.61], [5.54, 21.42], [9.75, 24.84], [12.9, 105.38], [0.55, 129.16], [49.54, 3.56], [46.54, 34.04], [0.55, 131.53], [30.51, 199.16], [35.24, 209.83], [49.54, 181.72], [32.08, 57.95], [50.21, 5.92], [60.2, 3.56], [51.71, 176.2]]
+  ];
+}
+
+function draw() {
+  
+  background(0);
+  translate(width / 2, height / 2);
+  
+  noFill();
+  fill(250);
+  ellipse(0, 0, 300, 300); //-------background circle
+
+  push(); 
+  scale(scaleFactor); // makes sure only the shape scales and not the circle
+  
+  beginShape();
+  for (let i = 0; i < shapes[currentShape].length; i++) {
+    let x = shapes[currentShape][i][0] - 50; //Refrenced from example sketch
+    let y = shapes[currentShape][i][1] - 120; 
+    vertex(x, y);
+  }
+  endShape(CLOSE);
+  
+  pop(); //shape breithing in and out code stops
+  
+  // breathing in and out effect for shapes
+  scaleFactor = 0.8 + sin(frameCount * 0.01) * 0.2;
+  
+  if (frameCount % switchInterval === 0) { 
+    currentShape = (currentShape + 1) % shapes.length;
+  }
+
+  
+  
+  
+  resetMatrix();
+  textAlign(LEFT, TOP); // Align text to the left and top again
+  fill(255);
+  text("STREET CANVAS: Daily paths across the city.", 10, 10); // Position text in top left
+  text(days[currentShape], width -390, 30); // Uses value from current shape to pull from days array
+}
+
+    </script>
+
+</body>
+</html>
