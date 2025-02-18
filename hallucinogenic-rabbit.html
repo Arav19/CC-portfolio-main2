@@ -19,7 +19,7 @@
         max-width: 800px;
       }
 
-      iframe {
+      canvas {
         border: none;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -39,13 +39,32 @@
         text-decoration: underline;
       }
     </style>
+    <!-- Include the p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
   </head>
   <body>
     <main>
       <h1>Hallucinogenic Rabbit</h1>
-      <iframe src="https://editor.p5js.org/arav42/full/E_Am1X-my"></iframe>
-            <a href="index.html">Back to Home</a>
+      <!-- The p5.js sketch will be rendered here -->
+      <div id="p5-sketch"></div>
+      <a href="index.html">Back to Home</a>
     </main>
+
+    <!-- Your p5.js sketch code -->
+    <script>
+      // Your p5.js sketch code goes here
+      function setup() {
+        createCanvas(800, 600);
+        background(255);
+        // Add your sketch code here
+      }
+
+      function draw() {
+        // Example: Draw a moving ellipse
+        background(255);
+        fill(0);
+        ellipse(mouseX, mouseY, 50, 50);
+      }
+    </script>
   </body>
 </html>
-
