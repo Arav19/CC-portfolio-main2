@@ -1,50 +1,596 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survive New York</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f4f4f4;
-        color: #333;
-        text-align: center;
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      main {
-        margin: 40px auto;
-        max-width: 800px;
-      }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+            text-align: center;
+            font-family: serif;
+        }
 
-      iframe {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        height: 600px;
-      }
+        h1 {
+            color: red;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
 
-      a {
-        display: inline-block;
-        margin-top: 20px;
-        color: #007BFF;
-        text-decoration: none;
-        font-size: 1.2em;
-      }
+        #p5-sketch {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-      a:hover {
-        text-decoration: underline;
-      }
+        a {
+            display: block;
+            text-decoration: none;
+            font-size: 18px;
+            color: black;
+            background: red;
+            padding: 10px 15px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        a:hover {
+            background: darkred;
+        }
     </style>
-  </head>
-  <body>
-    <main>
-      <h1>Survive New York</h1>
-      <iframe src="https://editor.p5js.org/arav42/full/3rVdapVrX"></iframe>
-      <a href="index.html">Back to Home</a>
-    </main>
-  </body>
+</head>
+<body>
+
+    <h1>Survive New York</h1>
+    <div id="p5-sketch"></div>
+    <a href="index.html">Back to Home</a>
+
+    <script>
+    
+let startTextX = 150; 
+let startTextY = 375;  
+
+let endFrameWidthCustom = 600; 
+let endFrameHeightCustom = 400; 
+
+
+
+let endSprite; 
+
+const endFrameCount = 2; 
+let endFrame = 0; 
+let endScale = 0.5; 
+
+
+
+let destination; 
+let destinationX; 
+let destinationReached = false; 
+
+
+let baseObstacleSpeed = 10; 
+let obstacleSpeed = baseObstacleSpeed; 
+
+let startSprite; 
+const startFrameCount = 2; 
+let startFrame = 0; 
+let startScale = 0.4; 
+let startScreen = true; 
+
+let bgScaleX = 0.15; 
+let bgScaleY = 1; 
+let bgOffsetX = 0; 
+let bgOffsetY = -100;
+let bgSpacing = 0; 
+
+let characterSpriteSheet, obstacle1Img, obstacle2Img, obstacle3Img, ratSpriteSheet, pigeonSpriteSheet, bgImage, ripSprite, music, jumpSound, dieSound;
+let obstacles = [];
+let groundY;
+let characterFrame = 0;
+let ratFrame = 0;
+let pigeonFrame = 0;
+let gravity = 0.8;
+let jumpPower = -17;
+let characterY, velocityY = 0;
+let isJumping = false;
+let jumpCount = 0; 
+let obstacleIncreaseInterval = 300;
+let elapsedTime = 0; // Timer to track running time
+let speedIncreaseInterval = 180; // Frequency (in frames) to increase the speed
+
+// Sprite sheets
+const characterFrameCount = 4;
+const ratFrameCount = 2;
+const pigeonFrameCount = 2; 
+const characterFrameWidth = 100;
+const characterFrameHeight = 80;
+const ratFrameWidth = 100;
+const ratFrameHeight = 80;
+const pigeonFrameWidth = 100;
+const pigeonFrameHeight = 100;
+const ripFrameCount = 3;
+let ripFrame = 0;
+let ripScale = 0.5;
+
+// Scaling 
+let characterScale = 2;
+let ratScale = 0.7;
+let pigeonScale = 0.8; // Scale for pigeon 
+let obstacleScale = 1.2;
+
+let characterMask, ratMask, obstacle1Mask, obstacle2Mask, obstacle3Mask, pigeonMask;
+
+let nextObstacleFrame = 0;
+
+// Background scrolling variables
+let bgX1 = 0;
+let bgX2;
+let bgSpeed = 2;
+
+let isGameOver = false;
+
+function preload() {
+  startSprite = loadImage('start.png'); // Load the start screen sprite with 2 frames
+  destination = loadImage('destination.png'); // Load destination image
+  endSprite = loadImage('end.png'); // Load the success screen sprite
+
+  characterSpriteSheet = loadImage('character.png');
+  obstacle1Img = loadImage('obstacle1.png');
+  obstacle2Img = loadImage('obstacle2.png');
+  obstacle3Img = loadImage('obstacle3.png');
+  ratSpriteSheet = loadImage('rat.png');
+  pigeonSpriteSheet = loadImage('pigion.png'); 
+  bgImage = loadImage('background.png');
+  ripSprite = loadImage('RIP.png');
+  music = loadSound('music.mp3');
+  jumpSound = loadSound('jump.mp3'); 
+  dieSound = loadSound('die.mp3'); 
+}
+
+function setup() {
+  let canvas = createCanvas(600, 400);
+  canvas.parent('p5-sketch'); // Attach canvas to the div
+  groundY = height - 60;
+
+  bgX2 = bgImage.width * bgScaleX + bgSpacing;
+  
+destinationX = width + 200; // Position closer to the right edge of the screen
+
+  characterY = groundY - characterFrameHeight * characterScale;
+
+  characterMask = createAlphaMask(characterSpriteSheet, characterFrameWidth, characterFrameHeight, characterFrameCount);
+  ratMask = createAlphaMask(ratSpriteSheet, ratFrameWidth, ratFrameHeight, ratFrameCount);
+  pigeonMask = createAlphaMask(pigeonSpriteSheet, pigeonFrameWidth, pigeonFrameHeight, pigeonFrameCount);
+  obstacle1Mask = createSingleFrameAlphaMask(obstacle1Img, 50, 50);
+  obstacle2Mask = createSingleFrameAlphaMask(obstacle2Img, 50, 50);
+  obstacle3Mask = createSingleFrameAlphaMask(obstacle3Img, 50, 50);
+  
+  music.loop();
+}
+
+
+
+          
+          
+      
+         
+function draw() {
+  noStroke();
+
+  if (startScreen) {
+    displayStartScreen();
+  } else if (!isGameOver && !destinationReached) {
+    background(220);
+
+    // Update timer
+    elapsedTime = frameCount / 60; // Increment elapsed time in seconds based on frame rate
+
+    // Increase speed every `speedIncreaseInterval` frames
+    if (frameCount % speedIncreaseInterval === 0) {
+      obstacleSpeed += 0.5;
+    }
+
+    // Draw the scrolling background
+    drawScrollingBackground();
+
+    // Draw the destination
+    drawDestination();
+
+    // Draw obstacles in front of the destination
+    handleObstacles();
+
+    // Draw the character last to ensure it is in front of everything
+    handleCharacter();
+
+    // Check if the character collides with obstacles
+    checkCollisions();
+
+    // Check if the character has reached the destination
+    checkDestinationCollision();
+
+    // Display timer at the top-left of the screen
+    fill(255);
+    textSize(18);
+    textStyle(BOLD)
+    textAlign(LEFT, TOP);
+    text("TIME: " + elapsedTime.toFixed(1) + "s", 10, 10);
+
+    // Draw ground elements (if needed)
+    fill(50);
+    rect(0, 380, width, 20);
+  } else if (destinationReached) {
+    displaySuccessScreen(); // Show success screen on reaching destination
+  } else {
+    displayGameOverAnimation();
+  }
+}
+
+
+
+
+function displayStartScreen() {
+  background(0);
+
+  // Calculate frame dimensions and draw the start sprite
+  let startFrameWidth = startSprite.width / startFrameCount;
+  image(
+    startSprite,
+    width / 2 - (startFrameWidth * startScale) / 2, height / 2 - (startSprite.height * startScale) / 2,
+    startFrameWidth * startScale, startSprite.height * startScale,
+    startFrame * startFrameWidth, 0, startFrameWidth, startSprite.height
+  );
+
+  // Advance to the next frame every 15 frames for animation
+  if (frameCount % 15 === 0) {
+    startFrame = (startFrame + 1) % startFrameCount;
+  }
+
+  // Display the start instruction text at custom position
+  textAlign(LEFT, TOP);
+  textSize(17); // Adjust size as needed
+  fill(255); // White color
+  textStyle(BOLD);
+  text("CLICK TO START & JUMP", startTextX, startTextY); // Use custom coordinates
+}
+
+
+
+function createAlphaMask(sprite, frameWidth, frameHeight, frameCount) {
+  let mask = [];
+  sprite.loadPixels();
+  for (let frame = 0; frame < frameCount; frame++) {
+    let frameData = [];
+    for (let y = 0; y < frameHeight; y++) {
+      let row = [];
+      for (let x = 0; x < frameWidth; x++) {
+        let pixelIndex = ((y * sprite.width + frame * frameWidth + x) * 4) + 3;
+        row.push(sprite.pixels[pixelIndex] > 0);
+      }
+      frameData.push(row);
+    }
+    mask.push(frameData);
+  }
+  return mask;
+}
+
+function createSingleFrameAlphaMask(image, width, height) {
+  let mask = [];
+  image.loadPixels();
+  for (let y = 0; y < height; y++) {
+    let row = [];
+    for (let x = 0; x < width; x++) {
+      let pixelIndex = ((y * width + x) * 4) + 3;
+      row.push(image.pixels[pixelIndex] > 0);
+    }
+    mask.push(row);
+  }
+  return mask;
+}
+
+function drawScrollingBackground() {
+  let bgWidth = bgImage.width * bgScaleX;
+  let bgHeight = height * bgScaleY;
+
+  image(bgImage, bgX1 + bgOffsetX, bgOffsetY, bgWidth, bgHeight);
+  image(bgImage, bgX2 + bgOffsetX, bgOffsetY, bgWidth, bgHeight);
+
+  bgX1 -= bgSpeed;
+  bgX2 -= bgSpeed;
+
+  if (bgX1 <= -bgWidth) {
+    bgX1 = bgX2 + bgWidth + bgSpacing;
+  }
+  if (bgX2 <= -bgWidth) {
+    bgX2 = bgX1 + bgWidth + bgSpacing;
+  }
+}
+
+function drawDestination() {
+  if (elapsedTime >= 20) { // time for end to happen
+    let scaledWidth = destination.width * 0.1; // Adjust scale factor as needed
+    let scaledHeight = destination.height * 0.1;
+    image(destination, destinationX, height - scaledHeight - 100, scaledWidth, scaledHeight);
+    destinationX -= bgSpeed; // Move destination at background speed
+  }
+}
+
+function checkDestinationCollision() {
+  // Calculate scaled width of the destination
+  let destinationScaledWidth = destination.width * 0.1;
+
+  // Ensure the entire destination is in view and character crosses halfway line
+  if (
+    destinationX <= 100 + characterFrameWidth * characterScale && // Character's x position for collision
+    destinationX + destinationScaledWidth >= 0 && // Ensure the entire destination width is visible on screen
+    100 + characterFrameWidth * characterScale > destinationX + destinationScaledWidth / 2 && // Check if character has crossed halfway
+    characterY >= height - (destination.height * 0.1) - 100 // Adjust collision on y-axis based on scaled height
+  ) {
+    destinationReached = true; // Set destination as reached
+  }
+}
+
+      
+function handleCharacter() {
+  velocityY += gravity;
+  characterY += velocityY;
+
+  if (characterY >= groundY - characterFrameHeight * characterScale) {
+    characterY = groundY - characterFrameHeight * characterScale;
+    velocityY = 0;
+    isJumping = false;
+    jumpCount = 0;
+  }
+
+  let frameX = characterFrame * characterFrameWidth;
+  image(
+    characterSpriteSheet,
+    100, characterY,
+    characterFrameWidth * characterScale, characterFrameHeight * characterScale,
+    frameX, 0, characterFrameWidth, characterFrameHeight
+  );
+
+  if (frameCount % 5 === 0 && !isJumping) {
+    characterFrame = (characterFrame + 1) % characterFrameCount;
+  }
+}
+
+function handleObstacles() {
+  if (frameCount >= nextObstacleFrame) {
+    let type = random(['obstacle1', 'obstacle2', 'obstacle3', 'rat', 'pigeon']);
+    let yPosition = groundY - 50 * obstacleScale;
+    let sizeScale = random(0.8, 1.5);
+
+    if (type === 'obstacle1') {
+      obstacles.push({ x: width, y: yPosition, type: 'obstacle1', scale: sizeScale });
+    } else if (type === 'obstacle2') {
+      obstacles.push({ x: width, y: yPosition, type: 'obstacle2', scale: sizeScale });
+    } else if (type === 'obstacle3') {
+      obstacles.push({ x: width, y: yPosition, type: 'obstacle3', scale: sizeScale });
+    } else if (type === 'rat') {
+      obstacles.push({ x: width, y: yPosition, type: 'rat', frame: 0, scale: sizeScale });
+    } else if (type === 'pigeon') {
+      let pigeonY = random(50, groundY - 150); // Random y-position above the player
+      obstacles.push({ x: width, y: pigeonY, type: 'pigeon', frame: 0, scale: pigeonScale });
+    }
+
+    nextObstacleFrame = frameCount + int(random(50, 100));
+  }
+
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    obstacles[i].x -= obstacleSpeed;
+
+    if (obstacles[i].type === 'obstacle1') {
+      image(obstacle1Img, obstacles[i].x, obstacles[i].y, 50 * obstacleScale * obstacles[i].scale, 50 * obstacleScale * obstacles[i].scale);
+    } else if (obstacles[i].type === 'obstacle2') {
+      image(obstacle2Img, obstacles[i].x, obstacles[i].y, 50 * obstacleScale * obstacles[i].scale, 50 * obstacleScale * obstacles[i].scale);
+    } else if (obstacles[i].type === 'obstacle3') {
+      image(obstacle3Img, obstacles[i].x, obstacles[i].y, 50 * obstacleScale * obstacles[i].scale, 50 * obstacleScale * obstacles[i].scale);
+    } else if (obstacles[i].type === 'rat') {
+      let frameX = obstacles[i].frame * ratFrameWidth;
+      image(
+        ratSpriteSheet,
+        obstacles[i].x, obstacles[i].y,
+        ratFrameWidth * ratScale * obstacles[i].scale, ratFrameHeight * ratScale * obstacles[i].scale,
+        frameX, 0, ratFrameWidth, ratFrameHeight
+      );
+      if (frameCount % 10 === 0) {
+        obstacles[i].frame = (obstacles[i].frame + 1) % ratFrameCount;
+      }
+    } else if (obstacles[i].type === 'pigeon') {
+      let frameX = obstacles[i].frame * pigeonFrameWidth;
+      image(
+        pigeonSpriteSheet,
+        obstacles[i].x, obstacles[i].y,
+        pigeonFrameWidth * pigeonScale, pigeonFrameHeight * pigeonScale,
+        frameX, 0, pigeonFrameWidth, pigeonFrameHeight
+      );
+      if (frameCount % 15 === 0) {
+        obstacles[i].frame = (obstacles[i].frame + 1) % pigeonFrameCount;
+      }
+    }
+
+    if (obstacles[i].x < -50) {
+      obstacles.splice(i, 1);
+    }
+  }
+}
+
+function checkCollisions() {
+  for (let obstacle of obstacles) {
+    let mask, frameWidth, frameHeight, scale;
+
+    if (obstacle.type === 'rat') {
+      mask = ratMask;
+      frameWidth = ratFrameWidth;
+      frameHeight = ratFrameHeight;
+      scale = ratScale;
+    } else if (obstacle.type === 'pigeon') {
+      mask = pigeonMask;
+      frameWidth = pigeonFrameWidth;
+      frameHeight = pigeonFrameHeight;
+      scale = pigeonScale;
+    } else if (obstacle.type === 'obstacle1') {
+      mask = [obstacle1Mask];
+      frameWidth = 50;
+      frameHeight = 50;
+      scale = obstacleScale;
+    } else if (obstacle.type === 'obstacle2') {
+      mask = [obstacle2Mask];
+      frameWidth = 50;
+      frameHeight = 50;
+      scale = obstacleScale;
+    } else if (obstacle.type === 'obstacle3') {
+      mask = [obstacle3Mask];
+      frameWidth = 50;
+      frameHeight = 50;
+      scale = obstacleScale;
+    }
+
+    let overlapLeft = max(100, obstacle.x);
+    let overlapRight = min(100 + characterFrameWidth * characterScale, obstacle.x + frameWidth * scale);
+    let overlapTop = max(characterY, obstacle.y);
+    let overlapBottom = min(characterY + characterFrameHeight * characterScale, obstacle.y + frameHeight * scale);
+
+    for (let x = overlapLeft; x < overlapRight; x++) {
+      for (let y = overlapTop; y < overlapBottom; y++) {
+        let charPixelX = floor((x - 100) / characterScale);
+        let charPixelY = floor((y - characterY) / characterScale);
+        let obsPixelX = floor((x - obstacle.x) / scale);
+        let obsPixelY = floor((y - obstacle.y) / scale);
+
+        if (characterMask[characterFrame][charPixelY][charPixelX] && mask[0][obsPixelY][obsPixelX]) {
+          isGameOver = true;
+          dieSound.play(); // Play death sound
+          music.stop(); // Stop music on death
+          return;
+        }
+      }
+    }
+  }
+}
+
+function displayGameOverAnimation() {
+  
+  //---------------------------------------------RIP banner
+  background(130);
+  let ripFrameWidth = ripSprite.width / ripFrameCount;
+
+  image(
+    ripSprite,
+    width / 2 - (ripFrameWidth * ripScale) / 2, height / 2 - (ripSprite.height * ripScale) / 2,
+    ripFrameWidth * ripScale, ripSprite.height * ripScale,
+    ripFrame * ripFrameWidth, 0, ripFrameWidth, ripSprite.height
+  );
+
+  if (frameCount % 10 === 0) {
+    ripFrame = (ripFrame + 1) % ripFrameCount;
+  }
+}
+
+function keyPressed() {
+  if (key === ' ' && !isJumping && !isGameOver) {
+    velocityY = jumpPower;
+    isJumping = true;
+    jumpCount++;
+    jumpSound.play(); // Play jump sound
+  }
+}
+//----------------------------------------------  jumping
+
+
+//------------------------------------- restart
+
+function restartGame() {
+  // Reset game variables
+  isGameOver = false;
+  destinationReached = false; // Reset destination status
+  destinationX = width + 200; // Reset destination position
+  obstacles = []; // Clear all obstacles
+  characterY = groundY - characterFrameHeight * characterScale; // Reset character position
+  velocityY = 0; // Reset character velocity
+  characterFrame = 0; // Reset character animation frame
+  ripFrame = 0; // Reset RIP animation frame
+  endFrame = 0; // Reset end screen animation frame
+  nextObstacleFrame = 0; // Reset obstacle spawn timing
+  obstacleSpeed = baseObstacleSpeed; // Reset obstacle speed
+  elapsedTime = 0; // Reset timer
+  frameCount = 0; // Reset frame count
+
+  music.stop(); // Stop any previous music
+  music.loop(); // Start music again
+}
+
+function mousePressed() {
+  if (startScreen) {
+    startScreen = false; // Hide the start screen
+    restartGame(); // Fully reset the game state before starting
+    music.stop(); // Stop any previous music
+    music.loop(); // Start music
+  } else if (!isGameOver && jumpCount < 2) {
+    // Handle jumps during gameplay
+    velocityY = jumpPower;
+    isJumping = true;
+    jumpCount++;
+    jumpSound.play();
+  } else if (isGameOver) {
+    // Handle game-over restart
+    let ripFrameWidth = ripSprite.width / ripFrameCount * ripScale;
+    let ripHeight = ripSprite.height * ripScale;
+    let x = width / 2 - ripFrameWidth / 2;
+    let y = height / 2 - ripHeight / 2;
+
+    if (mouseX > x && mouseX < x + ripFrameWidth && mouseY > y && mouseY < y + ripHeight) {
+      restartGame();
+      startScreen = true; // Go back to the start screen
+    }
+  } else if (destinationReached) {
+    // Handle click on the end screen
+    let endFrameWidth = endSprite.width / endFrameCount * endScale;
+    let endHeight = endSprite.height * endScale;
+    let x = width / 2 - endFrameWidth / 2;
+    let y = height / 2 - endHeight / 2;
+
+    if (mouseX > x && mouseX < x + endFrameWidth && mouseY > y && mouseY < y + endHeight) {
+      restartGame();
+      startScreen = true; // Go back to the start screen
+    }
+  }
+}
+
+
+function displaySuccessScreen() {
+  background(0, 200, 0); // A green background for success
+
+  // Calculate frame dimensions and draw the end sprite at customized size
+  let endFrameWidth = endSprite.width / endFrameCount;
+  image(
+    endSprite,
+    width / 2 - endFrameWidthCustom / 2, height / 2 - endFrameHeightCustom / 2, // Center the custom-sized image
+    endFrameWidthCustom, endFrameHeightCustom,
+    endFrame * endFrameWidth, 0, endFrameWidth, endSprite.height
+  );
+
+  // Animate the sprite every 15 frames
+  if (frameCount % 15 === 0) {
+    endFrame = (endFrame + 1) % endFrameCount;
+  }
+}
+ 
+    </script>
+
+</body>
 </html>
