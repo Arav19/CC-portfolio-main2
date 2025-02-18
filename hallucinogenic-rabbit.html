@@ -9,20 +9,24 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
-        background: #f4f4f4;
-        color: #333;
+        background: #0f0f0f; /* Dark gray background */
+        color: #ff0000; /* White text */
         text-align: center;
       }
 
       main {
         margin: 40px auto;
         max-width: 800px;
+        padding: 20px;
+        background: #141414; /* Slightly lighter gray for the main content area */
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       }
 
       canvas {
         border: none;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         width: 100%;
         height: 600px;
       }
@@ -30,13 +34,25 @@
       a {
         display: inline-block;
         margin-top: 20px;
-        color: #007BFF;
+        padding: 10px 20px;
+        background: #c90000; /* Red button background */
+        color: #fff;
         text-decoration: none;
         font-size: 1.2em;
+        border-radius: px;
+        transition: background 0.3s ease, transform 0.2s ease;
       }
 
       a:hover {
-        text-decoration: underline;
+        background: #cc0000; /* Darker red on hover */
+        transform: scale(1.05); /* Slightly enlarge the button on hover */
+      }
+
+      h1 {
+        color: #ff0000; /* Red heading */
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       }
     </style>
     <!-- Include the p5.js library -->
