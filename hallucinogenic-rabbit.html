@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAGE TITLE HERE</title>
+    <title>Page Title</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
         * {
@@ -18,8 +18,15 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            background-color: black;
             text-align: center;
-            font-family: Arial, sans-serif;
+            font-family: serif;
+        }
+
+        h1 {
+            color: red;
+            margin-bottom: 20px;
+            font-size: 32px;
         }
 
         #p5-sketch {
@@ -34,32 +41,31 @@
             display: block;
             text-decoration: none;
             font-size: 18px;
-            color: #000;
-            margin-top: 20px;
+            color: black;
+            background: red;
             padding: 10px 15px;
-            border: 1px solid #000;
             border-radius: 5px;
             transition: 0.3s;
+            font-weight: bold;
         }
 
         a:hover {
-            background: #000;
-            color: #fff;
+            background: darkred;
         }
     </style>
 </head>
 <body>
 
+    <h1>Page Title</h1>
     <div id="p5-sketch"></div>
     <a href="index.html">Back to Home</a>
 
     <script>
-       //Arav Tewari, Hallucinogenic Rabbit
-
-function setup() {
-  createCanvas(400, 400);  
-}
-
+        function setup() {
+            let canvas = createCanvas(400, 400);
+            canvas.parent('p5-sketch'); // Attach canvas to the div
+        }
+         
 function draw() {
   
   //BACKRGOUND---------------------------------------------------------------
@@ -282,7 +288,6 @@ function draw() {
   
 
 }
-
     </script>
 
 </body>
