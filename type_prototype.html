@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Typography (Final)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: black;
+            text-align: center;
+            font-family: serif;
+            padding: 20px;
+        }
+        h1 {
+            color: red;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        .sketches-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+        .sketch-box {
+            width: 600px;
+            height: 600px;
+        }
+        a {
+            display: block;
+            text-decoration: none;
+            font-size: 18px;
+            color: black;
+            background: red;
+            padding: 10px 15px;
+            transition: 0.3s;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        a:hover {
+            background: darkred;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Typography (Final)</h1>
+    <div class="sketches-container">
+        <!-- Prototypes for "While" -->
+        <div id="sketch1" class="sketch-box"></div>
+        <div id="sketch2" class="sketch-box"></div>
+        <div id="sketch3" class="sketch-box"></div>
+        <!-- Prototypes for "(alive)" -->
+        <div id="sketch4" class="sketch-box"></div>
+        <div id="sketch5" class="sketch-box"></div>
+        <div id="sketch6" class="sketch-box"></div>
+        <!-- Prototypes for "{create}" -->
+        <div id="sketch7" class="sketch-box"></div>
+        <div id="sketch8" class="sketch-box"></div>
+        <div id="sketch9" class="sketch-box"></div>
+    </div>
+    <a href="index.html">Back to Home</a>
+
+    <script>
+        // =============================================
+        // Prototypes for "While"
+        // =============================================
+
+        // Prototype 1 - "While" Wave Effect
+        new p5(function(p) {
+            let points;
+            let angle = 0;
+            let radius = 5;
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch1');
+                p.textSize(128);
+                p.textAlign(p.CENTER, p.CENTER);
+                let txt = "While";
+                let x = p.width / 2 - 150;
+                let y = p.height / 2 + 20;
+                points = [];
+                let density = 5;
+                for (let i = 0; i < txt.length; i++) {
+                    let letterPoints = getTextPoints(txt[i], x + i * 70, y, 128, density);
+                    points = points.concat(letterPoints);
+                }
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.fill(255);
+                p.noStroke();
+                for (let i = 0; i < points.length; i++) {
+                    let point = points[i];
+                    let offset = p.sin(angle + i * 0.1) * radius;
+                    p.ellipse(point.x, point.y + offset, 3, 3);
+                }
+                angle += 0.1;
+            }
+
+            function getTextPoints(letter, x, y, size, density) {
+                let points = [];
+                let gfx = p.createGraphics(p.width, p.height);
+                gfx.pixelDensity(1);
+                gfx.textSize(size);
+                gfx.textAlign(p.CENTER, p.CENTER);
+                gfx.fill(255);
+                gfx.text(letter, x, y);
+                gfx.loadPixels();
+                for (let i = 0; i < gfx.width; i += density) {
+                    for (let j = 0; j < gfx.height; j += density) {
+                        let index = (j * gfx.width + i) * 4;
+                        let brightness = gfx.pixels[index];
+                        if (brightness > 100) {
+                            points.push(p.createVector(i, j));
+                        }
+                    }
+                }
+                return points;
+            }
+        });
+
+        // Prototype 2 - "While" Scatter Effect
+        new p5(function(p) {
+            let points = [];
+            let txt = "While";
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch2');
+                p.textSize(128);
+                p.textAlign(p.CENTER, p.CENTER);
+                let x = p.width / 2 - 150;
+                let y = p.height / 2 + 20;
+                let density = 5;
+                for (let i = 0; i < txt.length; i++) {
+                    let letterPoints = getTextPoints(txt[i], x + i * 70, y, 128, density);
+                    points = points.concat(letterPoints);
+                }
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.fill(255);
+                p.noStroke();
+                for (let i = 0; i < points.length; i++) {
+                    let point = points[i];
+                    let d = p.dist(p.mouseX, p.mouseY, point.x, point.y);
+                    let offset = p.map(d, 0, 200, 20, 0);
+                    p.ellipse(point.x + p.random(-offset, offset), point.y + p.random(-offset, offset), 3, 3);
+                }
+            }
+
+            function getTextPoints(letter, x, y, size, density) {
+                let points = [];
+                let gfx = p.createGraphics(p.width, p.height);
+                gfx.pixelDensity(1);
+                gfx.textSize(size);
+                gfx.textAlign(p.CENTER, p.CENTER);
+                gfx.fill(255);
+                gfx.text(letter, x, y);
+                gfx.loadPixels();
+                for (let i = 0; i < gfx.width; i += density) {
+                    for (let j = 0; j < gfx.height; j += density) {
+                        let index = (j * gfx.width + i) * 4;
+                        let brightness = gfx.pixels[index];
+                        if (brightness > 100) {
+                            points.push(p.createVector(i, j));
+                        }
+                    }
+                }
+                return points;
+            }
+        });
+
+        // Prototype 3 - "While" Color Shift Effect
+        new p5(function(p) {
+            let points;
+            let angle = 0;
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch3');
+                p.textSize(128);
+                p.textAlign(p.CENTER, p.CENTER);
+                let txt = "While";
+                let x = p.width / 2 - 150;
+                let y = p.height / 2 + 20;
+                points = [];
+                let density = 5;
+                for (let i = 0; i < txt.length; i++) {
+                    let letterPoints = getTextPoints(txt[i], x + i * 70, y, 128, density);
+                    points = points.concat(letterPoints);
+                }
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.noStroke();
+                for (let i = 0; i < points.length; i++) {
+                    let point = points[i];
+                    let hue = (angle + i * 0.1) % 360;
+                    p.fill(hue, 100, 100);
+                    p.ellipse(point.x, point.y, 5, 5);
+                }
+                angle += 1;
+            }
+
+            function getTextPoints(letter, x, y, size, density) {
+                let points = [];
+                let gfx = p.createGraphics(p.width, p.height);
+                gfx.pixelDensity(1);
+                gfx.textSize(size);
+                gfx.textAlign(p.CENTER, p.CENTER);
+                gfx.fill(255);
+                gfx.text(letter, x, y);
+                gfx.loadPixels();
+                for (let i = 0; i < gfx.width; i += density) {
+                    for (let j = 0; j < gfx.height; j += density) {
+                        let index = (j * gfx.width + i) * 4;
+                        let brightness = gfx.pixels[index];
+                        if (brightness > 100) {
+                            points.push(p.createVector(i, j));
+                        }
+                    }
+                }
+                return points;
+            }
+        });
+
+        // =============================================
+        // Prototypes for "(alive)"
+        // =============================================
+
+        // Prototype 4 - "(alive)" Style Animation
+        new p5(function(p) {
+            let styles = ["normal", "italic", "bold", "bold italic"];
+            let chars = ["(", "a", "l", "i", "v", "e", ")"];
+            let charStyles = [];
+            let lastChange = 0;
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch4');
+                p.textSize(70);
+                p.textAlign(p.CENTER, p.CENTER);
+                for (let i = 0; i < chars.length; i++) {
+                    charStyles.push(randomStyle(chars[i]));
+                }
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.fill(255);
+                let word = "";
+                for (let i = 0; i < chars.length; i++) {
+                    word += charStyles[i].char;
+                }
+                let x = p.width / 2 - 120;
+                let y = p.height / 2;
+                for (let i = 0; i < chars.length; i++) {
+                    p.push();
+                    p.textFont("sans-serif");
+                    p.textStyle(charStyles[i].style);
+                    p.text(word[i], x + i * 40, y);
+                    p.pop();
+                }
+                if (p.millis() - lastChange > 100) {
+                    for (let i = 0; i < chars.length; i++) {
+                        charStyles[i] = randomStyle(chars[i]);
+                    }
+                    lastChange = p.millis();
+                }
+            }
+
+            function randomStyle(char) {
+                let newStyle = p.random(styles);
+                let newChar = p.random() > 0.5 ? char.toUpperCase() : char.toLowerCase();
+                return { char: newChar, style: newStyle };
+            }
+        });
+
+        // Prototype 5 - "(alive)" Color Pulse Effect
+        new p5(function(p) {
+            let chars = ["(", "a", "l", "i", "v", "e", ")"];
+            let angle = 0;
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch5');
+                p.textSize(70);
+                p.textAlign(p.CENTER, p.CENTER);
+            }
+
+            p.draw = function() {
+                p.background(0);
+                let x = p.width / 2 - 120;
+                let y = p.height / 2;
+                for (let i = 0; i < chars.length; i++) {
+                    let hue = (angle + i * 20) % 360;
+                    p.fill(hue, 100, 100);
+                    p.text(chars[i], x + i * 40, y);
+                }
+                angle += 1;
+            }
+        });
+
+        // Prototype 6 - "(alive)" Jitter Effect
+        new p5(function(p) {
+            let chars = ["(", "a", "l", "i", "v", "e", ")"];
+            let offsets = [];
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch6');
+                p.textSize(70);
+                p.textAlign(p.CENTER, p.CENTER);
+                for (let i = 0; i < chars.length; i++) {
+                    offsets.push({ x: 0, y: 0 });
+                }
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.fill(255);
+                let x = p.width / 2 - 120;
+                let y = p.height / 2;
+                for (let i = 0; i < chars.length; i++) {
+                    offsets[i].x = p.random(-5, 5);
+                    offsets[i].y = p.random(-5, 5);
+                    p.text(chars[i], x + i * 40 + offsets[i].x, y + offsets[i].y);
+                }
+            }
+        });
+
+        // =============================================
+        // Prototypes for "{create}"
+        // =============================================
+
+        // Prototype 7 - "{create}" Building Effect
+        new p5(function(p) {
+            let points = [];
+            let textStr = "{create}";
+            let sortedPoints = [];
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch7');
+                p.textSize(100);
+                p.textAlign(p.CENTER, p.CENTER);
+                
+                let g = p.createGraphics(600, 600);
+                g.pixelDensity(1);
+                g.background(0);
+                g.fill(255);
+                g.textSize(100);
+                g.textAlign(p.CENTER, p.CENTER);
+                g.text(textStr, p.width/2, p.height/2);
+                g.loadPixels();
+                
+                for (let y = 0; y < p.height; y += 4) {
+                    for (let x = 0; x < p.width; x += 4) {
+                        let index = 4 * (y * p.width + x);
+                        if (g.pixels[index] > 128) {
+                            points.push({
+                                x: x,
+                                y: y,
+                                originalX: x,
+                                originalY: y,
+                                active: false,
+                                offset: p.random(1000)
+                            });
+                        }
+                    }
+                }
+                
+                sortedPoints = [...points].sort((a, b) => a.x - b.x);
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.noStroke();
+                p.fill(255);
+                
+                let progress = p.map(p.mouseX, 0, p.width, 0, sortedPoints.length);
+                
+                for (let i = 0; i < sortedPoints.length; i++) {
+                    let pt = sortedPoints[i];
+                    
+                    if (i < progress) {
+                        pt.active = true;
+                        pt.x = p.lerp(pt.x, pt.originalX, 0.1);
+                        pt.y = p.lerp(pt.y, pt.originalY, 0.1);
+                    } else {
+                        pt.active = false;
+                        pt.x = p.lerp(pt.x, pt.originalX + p.random(-100, 100), 0.05);
+                        pt.y = p.lerp(pt.y, pt.originalY + p.random(-100, 100), 0.05);
+                    }
+                    
+                    if (pt.active) {
+                        let d = p.dist(p.mouseX, p.mouseY, pt.x, pt.y);
+                        let radius = p.map(d, 0, 100, 8, 2);
+                        radius = p.constrain(radius, 2, 8);
+                        p.circle(pt.x, pt.y, radius);
+                    } else {
+                        p.circle(pt.x, pt.y, 2);
+                    }
+                }
+            }
+        });
+
+        // Prototype 8 - "{create}" Particle Explosion Effect
+        new p5(function(p) {
+            let particles = [];
+            let textStr = "{create}";
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch8');
+                p.textSize(100);
+                p.textAlign(p.CENTER, p.CENTER);
+                
+                let g = p.createGraphics(600, 600);
+                g.pixelDensity(1);
+                g.background(0);
+                g.fill(255);
+                g.textSize(100);
+                g.textAlign(p.CENTER, p.CENTER);
+                g.text(textStr, p.width/2, p.height/2);
+                g.loadPixels();
+                
+                for (let y = 0; y < p.height; y += 4) {
+                    for (let x = 0; x < p.width; x += 4) {
+                        let index = 4 * (y * p.width + x);
+                        if (g.pixels[index] > 128) {
+                            particles.push({
+                                x: x,
+                                y: y,
+                                vx: p.random(-2, 2),
+                                vy: p.random(-2, 2),
+                                life: 255
+                            });
+                        }
+                    }
+                }
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.noStroke();
+                p.fill(255);
+                
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let pt = particles[i];
+                    pt.x += pt.vx;
+                    pt.y += pt.vy;
+                    pt.life -= 2;
+                    p.fill(255, pt.life);
+                    p.circle(pt.x, pt.y, 2);
+                    if (pt.life <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+            }
+        });
+
+        // Prototype 9 - "{create}" Color Trail Effect
+        new p5(function(p) {
+            let points = [];
+            let textStr = "{create}";
+            let angle = 0;
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch9');
+                p.textSize(100);
+                p.textAlign(p.CENTER, p.CENTER);
+                
+                let g = p.createGraphics(600, 600);
+                g.pixelDensity(1);
+                g.background(0);
+                g.fill(255);
+                g.textSize(100);
+                g.textAlign(p.CENTER, p.CENTER);
+                g.text(textStr, p.width/2, p.height/2);
+                g.loadPixels();
+                
+                for (let y = 0; y < p.height; y += 4) {
+                    for (let x = 0; x < p.width; x += 4) {
+                        let index = 4 * (y * p.width + x);
+                        if (g.pixels[index] > 128) {
+                            points.push({
+                                x: x,
+                                y: y,
+                                hue: p.random(360)
+                            });
+                        }
+                    }
+                }
+            }
+
+            p.draw = function() {
+                p.background(0);
+                p.noStroke();
+                
+                for (let i = 0; i < points.length; i++) {
+                    let pt = points[i];
+                    pt.hue = (pt.hue + 1) % 360;
+                    p.fill(pt.hue, 100, 100);
+                    p.circle(pt.x, pt.y, 4);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
