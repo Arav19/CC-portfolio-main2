@@ -15,11 +15,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: flex-start;
+            min-height: 100vh;
             background-color: black;
             text-align: center;
             font-family: serif;
+            padding: 20px 0;
         }
 
         h1 {
@@ -42,8 +43,10 @@
         }
 
         #p5-container {
-            width: 80%;
-            height: 500px;
+            width: 90vw;
+            max-width: 800px;
+            height: 90vw;
+            max-height: 800px;
             margin-bottom: 20px;
         }
 
@@ -62,6 +65,7 @@
             padding: 10px 15px;
             transition: 0.3s;
             font-weight: bold;
+            margin-top: 20px;
         }
 
         a:hover {
