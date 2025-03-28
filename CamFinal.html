@@ -7,70 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: black;
-            text-align: center;
-            font-family: serif;
-        }
-
-        h1 {
-            color: red;
-            margin-bottom: 20px;
-            font-size: 32px;
-        }
-
-        #p5-sketch {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        a {
-            display: block;
-            text-decoration: none;
-            font-size: 18px;
-            color: black;
-            background: red;
-            padding: 10px 15px;
-            transition: 0.3s;
-            font-weight: bold;
-        }
-
-        a:hover {
-            background: darkred;
-        }
-
-        .instructions {
-            color: red;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .results-container {
-            background-color: black;
-            padding: 20px;
-            border: 2px solid red;
-            margin-top: 20px;
-        }
-
-        .result {
-            color: red;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
+        /* ... */
     </style>
 </head>
 <body>
@@ -111,7 +48,8 @@
         }
 
         function setup() {
-            createCanvas(windowWidth, windowHeight);
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('p5-sketch');
             console.log(width, height);
             dotX = width / 2;
 
@@ -139,7 +77,7 @@
         function draw() {
             background(0);
 
-                      if (calibrating) {
+            if (calibrating) {
                 fill(255, 0, 0);
                 noStroke();
                 ellipse(calibrationPoints[currentCalibrationPoint].x, calibrationPoints[currentCalibrationPoint].y, 50, 50);
@@ -161,80 +99,30 @@
                     dotX = width / 2;
                 }
 
-                if (round > 0) {
-                    image(leftImage, 100, 300, 500, 500);
-                    image(rightImage, width - 600, 300, 500, 500);
+              if (round > 0) {
+    image(leftImage, 100, 300, 500, 500);
+    image(rightImage, width - 600, 300, 500, 500);
 
-                    if (dotX < width / 2 - 100) {
-                        gazeData[leftCategory] = (gazeData[leftCategory] || 0) + 1;
-                    } else if (dotX > width / 2 + 100) {
-                        gazeData[rightCategory] = (gazeData[rightCategory] || 0) + 1;
-                    }
+    if (dotX < width / 2 - 100) {
+        gazeData[leftCategory] = (gazeData[leftCategory] || 0) + 1;
+    } else if (dotX > width / 2 + 100) {
+        gazeData[rightCategory] = (gazeData[rightCategory] || 0) + 1;
+    }
 
-                    fill(255, 0, 0);
-                    noStroke();
-                    ellipse(dotX, height / 2, 50, 50);
+    fill(255, 0, 0);
+    noStroke();
+    ellipse(dotX, height / 2, 50, 50);
 
-                    if (millis() - startTime > roundTime) {
-                        newRound();
-                    }
+    if (millis() - startTime > roundTime) {
+        newRound();
+    }
 
-                    if (round >= totalRounds) {
-                        showResults();
-                        noLoop();
-                    }
-                } else {
-                    fill(255, 0, 0);
-                    noStroke();
-                    ellipse(dotX, height / 2, 50, 50);
-                }
-            }
-        }
-
-        function newRound() {
-            leftCategory = random(categories);
-            rightCategory = random(categories);
-            while (rightCategory === leftCategory) {
-                rightCategory = random(categories);
-            }
-            leftImage = random(currentImages[leftCategory]);
-            rightImage = random(currentImages[rightCategory]);
-            startTime = millis();
-            round++;
-        }
-
-        function showResults() {
-            background(0);
-            fill(255, 0, 0);
-            textSize(32);
-            textAlign(CENTER, CENTER);
-            text('Results:', width / 2, height / 2 - 250);
-
-            let resultsContainer = document.getElementById("results-container");
-            resultsContainer.style.display = "block";
-
-            let totalGazeTime = 0;
-            for (let category in gazeData) {
-                totalGazeTime += gazeData[category];
-            }
-            let categoryIndex = 0;
-            for (let category in gazeData) {
-                let gazeTime = gazeData[category];
-                let percentage = (gazeTime / totalGazeTime) * 100;
-                let resultElement = document.createElement("div");
-                resultElement.className = "result";
-                resultElement.innerHTML = category + ': ' + percentage.toFixed(2) + '%';
-                resultsContainer.appendChild(resultElement);
-                categoryIndex++;
-            }
-        }
-
-        function keyPressed() {
-            if (keyCode === ENTER && !calibrating) {
-                round++;
-                newRound();
-            }
-        }
-    </script>
-</body>
-</html>
+    if (round >= totalRounds) {
+        showResults();
+        noLoop();
+    }
+} else {
+    fill(255, 0, 0);
+    noStroke();
+    ellipse(dotX, height / 2, 50, 50);
+}
