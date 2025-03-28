@@ -52,12 +52,33 @@
         a:hover {
             background: darkred;
         }
+
+        .instructions {
+            color: red;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .results-container {
+            background-color: black;
+            padding: 20px;
+            border: 2px solid red;
+            margin-top: 20px;
+        }
+
+        .result {
+            color: red;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>Eye Tracking</h1>
     <div id="p5-sketch"></div>
     <a href="index.html">Back to Home</a>
+    <div class="instructions" id="instructions"></div>
+    <div class="results-container" id="results-container" style="display: none;"></div>
     <script>
         let gazeX, gazeY;
         let categories = ['fashion', 'sports', 'nature', 'architecture'];
@@ -66,7 +87,7 @@
         let imagesLoaded = false;
         let unsplashApiKey = 'DZrm7IvE8Mv6nEKrwj4pOswBH6TX2kJXnkgBViV0nK8';
         let round = 0;
-        let roundTime = 3000;
+        let roundTime = 2000;
         let startTime;
         let leftCategory;
         let rightCategory;
@@ -76,6 +97,7 @@
         let calibrating = false;
         let calibrationPoints = [];
         let currentCalibrationPoint = 0;
+        let totalRounds = 20;
 
         function preload() {
             for (let i = 0; i < categories.length; i++) {
@@ -110,13 +132,15 @@
                 {x: width / 4, y: height - height / 4},
                 {x: width - width / 4, y: height - height / 4},
             ];
+
+            document.getElementById("instructions").innerHTML = "Please look at the red dots to calibrate the eye tracker.";
         }
 
         function draw() {
-            background(220);
+            background(0);
 
             if (calibrating) {
-                fill(255, 0, 0);
+                              fill(255, 0, 0);
                 noStroke();
                 ellipse(calibrationPoints[currentCalibrationPoint].x, calibrationPoints[currentCalibrationPoint].y, 50, 50);
 
@@ -124,15 +148,16 @@
                     currentCalibrationPoint++;
                     if (currentCalibrationPoint >= calibrationPoints.length) {
                         calibrating = false;
+                        document.getElementById("instructions").innerHTML = "Calibration complete. Press Enter to start the experiment.";
                     }
                 }
             } else {
                 if (gazeX) {
                     let diff = gazeX - width / 2;
-                    dotX += diff * 0.05;
+                    dotX += diff * 0.1; // Increased speed
                     dotX = constrain(dotX, 0, width);
                     console.log(dotX);
-                               } else {
+                } else {
                     dotX = width / 2;
                 }
 
@@ -150,44 +175,45 @@
                     noStroke();
                     ellipse(dotX, height / 2, 50, 50);
 
-                    if (millis() - startTime > roundTime) {
-                        newRound();
-                    }
+                   if (millis() - startTime > roundTime) {
+      newRound();
+    }
 
-                    if (round >= 10) {
-                        showResults();
-                        noLoop();
-                    }
+    if (round >= totalRounds) {
+      showResults();
+      noLoop();
+    }
+  }
                 } else {
                     fill(255, 0, 0);
                     noStroke();
                     ellipse(dotX, height / 2, 50, 50);
-                    fill(0);
-                    textSize(32);
-                    textAlign(CENTER, CENTER);
-                    text('Press Enter to start', width / 2, height / 2 - 50);
                 }
             }
         }
 
         function newRound() {
-            leftCategory = random(categories);
-            rightCategory = random(categories);
-            while (rightCategory === leftCategory) {
-                rightCategory = random(categories);
-            }
-            leftImage = random(currentImages[leftCategory]);
-            rightImage = random(currentImages[rightCategory]);
-            startTime = millis();
-            round++;
-        }
+  leftCategory = random(categories);
+  rightCategory = random(categories);
+  while (rightCategory === leftCategory) {
+    rightCategory = random(categories);
+  }
+  leftImage = random(currentImages[leftCategory]);
+  rightImage = random(currentImages[rightCategory]);
+  startTime = millis();
+  round++;
+}
 
         function showResults() {
-            background(220);
-            fill(0);
+            background(0);
+            fill(255, 0, 0);
             textSize(32);
             textAlign(CENTER, CENTER);
             text('Results:', width / 2, height / 2 - 250);
+
+            let resultsContainer = document.getElementById("results-container");
+            resultsContainer.style.display = "block";
+
             let totalGazeTime = 0;
             for (let category in gazeData) {
                 totalGazeTime += gazeData[category];
@@ -196,13 +222,16 @@
             for (let category in gazeData) {
                 let gazeTime = gazeData[category];
                 let percentage = (gazeTime / totalGazeTime) * 100;
-                text(category + ': ' + percentage.toFixed(2) + '%', width / 2, height / 2 - 200 + (categoryIndex * 50));
+                let resultElement = document.createElement("div");
+                resultElement.className = "result";
+                resultElement.innerHTML = category + ': ' + percentage.toFixed(2) + '%';
+                resultsContainer.appendChild(resultElement);
                 categoryIndex++;
             }
         }
 
         function keyPressed() {
-            if (keyCode === ENTER) {
+            if (keyCode === ENTER && !calibrating) {
                 round++;
                 newRound();
             }
