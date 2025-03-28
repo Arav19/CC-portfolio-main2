@@ -86,8 +86,9 @@
         let gazeData = {};
         let imagesLoaded = false;
         let unsplashApiKey = 'DZrm7IvE8Mv6nEKrwj4pOswBH6TX2kJXnkgBViV0nK8';
+        let roundTime = 2000; // 2 seconds per round
         let round = 0;
-        let roundTime = 2000;
+        let totalRounds = 20;
         let startTime;
         let leftCategory;
         let rightCategory;
@@ -97,7 +98,6 @@
         let calibrating = false;
         let calibrationPoints = [];
         let currentCalibrationPoint = 0;
-        let totalRounds = 20;
 
         function preload() {
             for (let i = 0; i < categories.length; i++) {
@@ -139,8 +139,8 @@
         function draw() {
             background(0);
 
-            if (calibrating) {
-                              fill(255, 0, 0);
+                      if (calibrating) {
+                fill(255, 0, 0);
                 noStroke();
                 ellipse(calibrationPoints[currentCalibrationPoint].x, calibrationPoints[currentCalibrationPoint].y, 50, 50);
 
@@ -175,15 +175,14 @@
                     noStroke();
                     ellipse(dotX, height / 2, 50, 50);
 
-                   if (millis() - startTime > roundTime) {
-      newRound();
-    }
+                    if (millis() - startTime > roundTime) {
+                        newRound();
+                    }
 
-    if (round >= totalRounds) {
-      showResults();
-      noLoop();
-    }
-  }
+                    if (round >= totalRounds) {
+                        showResults();
+                        noLoop();
+                    }
                 } else {
                     fill(255, 0, 0);
                     noStroke();
@@ -193,16 +192,16 @@
         }
 
         function newRound() {
-  leftCategory = random(categories);
-  rightCategory = random(categories);
-  while (rightCategory === leftCategory) {
-    rightCategory = random(categories);
-  }
-  leftImage = random(currentImages[leftCategory]);
-  rightImage = random(currentImages[rightCategory]);
-  startTime = millis();
-  round++;
-}
+            leftCategory = random(categories);
+            rightCategory = random(categories);
+            while (rightCategory === leftCategory) {
+                rightCategory = random(categories);
+            }
+            leftImage = random(currentImages[leftCategory]);
+            rightImage = random(currentImages[rightCategory]);
+            startTime = millis();
+            round++;
+        }
 
         function showResults() {
             background(0);
