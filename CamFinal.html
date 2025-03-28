@@ -87,18 +87,22 @@
             imagesLoaded = true;
         }
 
-        function setup() {
+       function setup() {
             createCanvas(windowWidth, windowHeight);
             console.log(width, height);
             dotX = width / 2;
-            webgazer.showVideo(true);
+
             webgazer.setGazeListener(function(data, timestamp) {
                 if (data) {
                     gazeX = data.x;
                     console.log(gazeX);
                 }
             }).begin({predictionPoints: 100, threshold: 0.5, calibration: true});
+
             webgazer.showPredictionPoints(false);
+
+            // Start calibration
+            webgazer.calibrate();
         }
 
         function draw() {
