@@ -91,23 +91,30 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  console.log(width, height); // Add this line
+  // ...
+
   dotX = width / 2;
   webgazer.showVideo(true);
-  webgazer.setGazeListener(function(data, timestamp) {
-    if (data) {
-      gazeX = data.x;
-    }
-  }).begin({predictionPoints: 100, threshold: 0.5, calibration: true});
+ webgazer.setGazeListener(function(data, timestamp) {
+  if (data) {
+    gazeX = data.x;
+    console.log(gazeX); // Add this line
+  }
+})
+      .begin({predictionPoints: 100, threshold: 0.5, calibration: true});
   webgazer.showPredictionPoints(false);
 }
 
 function draw() {
   background(220);
 
-  if (gazeX) {
-    let diff = gazeX - width / 2;
-    dotX += diff * 0.05;
-    dotX = constrain(dotX, 0, width);
+if (gazeX) {
+  let diff = gazeX - width / 2;
+  dotX += diff * 0.05;
+  dotX = constrain(dotX, 0, width);
+  console.log(dotX); // Add this line
+}
   } else {
     dotX = width / 2;
   }
