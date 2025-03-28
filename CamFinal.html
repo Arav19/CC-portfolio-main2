@@ -3,168 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Eye Tracking</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+    <title>Eye Tracking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.min.js"></script>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: black;
-            text-align: center;
-            font-family: serif;
-        }
-
-        h1 {
-            color: red;
-            margin-bottom: 20px;
-            font-size: 32px;
-        }
-
-        #p5-sketch {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        a {
-            display: block;
-            text-decoration: none;
-            font-size: 18px;
-            color: black;
-            background: red;
-            padding: 10px 15px;
-            transition: 0.3s;
-            font-weight: bold;
-        }
-
-        a:hover {
-            background: darkred;
-        }
+        /* ... */
     </style>
 </head>
 <body>
-
     <h1>Eye Tracking</h1>
     <div id="p5-sketch"></div>
     <a href="index.html">Back to Home</a>
-
     <script>
         let gazeX, gazeY;
-let categories = ['fashion', 'sports', 'nature', 'architecture'];
-let currentImages = {};
-let gazeData = {};
-let imagesLoaded = false;
-let unsplashApiKey = 'DZrm7IvE8Mv6nEKrwj4pOswBH6TX2kJXnkgBViV0nK8';
-let round = 0;
-let roundTime = 3000;
-let startTime;
-let leftCategory;
-let rightCategory;
-let leftImage;
-let rightImage;
-let dotX;
+        let categories = ['fashion', 'sports', 'nature', 'architecture'];
+        let currentImages = {};
+        let gazeData = {};
+        let imagesLoaded = false;
+        let unsplashApiKey = 'DZrm7IvE8Mv6nEKrwj4pOswBH6TX2kJXnkgBViV0nK8';
+        let round = 0;
+        let roundTime = 3000;
+        let startTime;
+        let leftCategory;
+        let rightCategory;
+        let leftImage;
+        let rightImage;
+        let dotX;
 
-function preload() {
-  for (let i = 0; i < categories.length; i++) {
-    let url = 'https://api.unsplash.com/search/photos?client_id=' + unsplashApiKey + '&query=' + categories[i] + '&per_page=10';
-    loadJSON(url, function(data) {
-      let imageUrls = data.results.map(result => result.urls.regular);
-      currentImages[categories[i]] = imageUrls.map(url => loadImage(url));
-    });
-  }
-  imagesLoaded = true;
-}
+        function preload() {
+            for (let i = 0; i < categories.length; i++) {
+                let url = 'https://api.unsplash.com/search/photos?client_id=' + unsplashApiKey + '&query=' + categories[i] + '&per_page=10';
+                loadJSON(url, function(data) {
+                    let imageUrls = data.results.map(result => result.urls.regular);
+                    currentImages[categories[i]] = imageUrls.map(url => loadImage(url));
+                });
+            }
+            imagesLoaded = true;
+        }
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  console.log(width, height); // Add this line
-  // ...
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            console.log(width, height);
+            dotX = width / 2;
+            webgazer.showVideo(true);
+            webgazer.setGazeListener(function(data, timestamp) {
+                if (data) {
+                    gazeX = data.x;
+                    console.log(gazeX);
+                }
+            }).begin({predictionPoints: 100, threshold: 0.5, calibration: true});
+            webgazer.showPredictionPoints(false);
+        }
 
-  dotX = width / 2;
-  webgazer.showVideo(true);
- webgazer.setGazeListener(function(data, timestamp) {
-  if (data) {
-    gazeX = data.x;
-    console.log(gazeX); // Add this line
-  }
-})
-      .begin({predictionPoints: 100, threshold: 0.5, calibration: true});
-  webgazer.showPredictionPoints(false);
-}
+        function draw() {
+            background(220);
 
-function draw() {
-  background(220);
+            if (gazeX) {
+                let diff = gazeX - width / 2;
+                dotX += diff * 0.05;
+                dotX = constrain(dotX, 0, width);
+                console.log(dotX);
+            } else {
+                dotX = width / 2;
+            }
 
-if (gazeX) {
-  let diff = gazeX - width / 2;
-  dotX += diff * 0.05;
-  dotX = constrain(dotX, 0, width);
-  console.log(dotX); // Add this line
-}
-  } else {
-    dotX = width / 2;
-  }
+            if (round > 0) {
+                image(leftImage, 100, 300, 500, 500);
+                image(rightImage, width - 600, 300, 500, 500);
 
-  if (round > 0) {
-    image(leftImage, 100, 300, 500, 500);
-    image(rightImage, width - 600, 300, 500, 500);
+                if (dotX < width / 2 - 100) {
+                    gazeData[leftCategory] = (gazeData[leftCategory] || 0) + 1;
+                } else if (dotX > width / 2 + 100) {
+                    gazeData[rightCategory] = (gazeData[rightCategory] || 0) + 1;
+                }
 
-    if (dotX < width / 2 - 100) {
-      gazeData[leftCategory] = (gazeData[leftCategory] || 0) + 1;
-    } else if (dotX > width / 2 + 100) {
-      gazeData[rightCategory] = (gazeData[rightCategory] || 0) + 1;
-    }
+                fill(255, 0, 0);
+                noStroke();
+                ellipse(dotX, height / 2, 50, 50);
 
-    fill(255, 0, 0);
-    noStroke();
-    ellipse(dotX, height / 2, 50, 50);
+                if (millis() - startTime > roundTime) {
+                    newRound();
+                }
 
-    if (millis() - startTime > roundTime) {
-      newRound();
-    }
+                if (round >= 10) {
+                    showResults();
+                    noLoop();
+                }
+            } else {
+                fill(255, 0, 0);
+                noStroke();
+                ellipse(dotX, height / 2, 50, 50);
+                fill(0);
+                textSize(32);
+                textAlign(CENTER, CENTER);
+                text('Press Enter to start', width / 2, height / 2 - 50);
+            }
+        }
 
-    if (round >= 10) {
-      showResults();
-      noLoop();
-    }
-  } else {
-    fill(255, 0, 0);
-    noStroke();
-    ellipse(dotX, height / 2, 50, 50);
-    fill(0);
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    text('Press Enter to start', width / 2, height / 2 - 50);
-  }
-}
+        function newRound() {
+            leftCategory = random(categories);
+            rightCategory = random(categories);
+            while (rightCategory === leftCategory) {
+                rightCategory = random(categories);
+            }
+            leftImage = random(currentImages[leftCategory]);
+            rightImage = random(currentImages[rightCategory]);
+            startTime = millis();
+            round++;
+        }
 
-function newRound() {
-  leftCategory = random(categories);
-  rightCategory = random(categories);
-  while (rightCategory === leftCategory) {
-    rightCategory = random(categories);
-  }
-  leftImage = random(currentImages[leftCategory]);
-  rightImage = random(currentImages[rightCategory]);
-  startTime = millis();
-  round++;
-}
-
-function showResults() {
+       function showResults() {
   background(220);
   fill(0);
   textSize(32);
@@ -189,8 +139,6 @@ function keyPressed() {
     newRound();
   }
 }
- 
     </script>
-
 </body>
 </html>
