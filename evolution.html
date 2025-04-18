@@ -231,7 +231,8 @@
       container.innerHTML = `
         <h1>${stage.title}</h1>
         <p>${stage.desc}</p>
-       
+               <>
+
         <div class="button-container">
           ${stage.options.map(option => `<button onclick="render('${option.next}')">${option.text}</button>`).join("")}
         </div>
