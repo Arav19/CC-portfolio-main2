@@ -18,10 +18,7 @@
       flex-direction: column;
       text-align: center;
     }
-    img {
-      width: 300px;
-      height: auto;
-      margin: 20px;
+ 
     }
     .button-container {
       display: flex;
@@ -234,7 +231,7 @@
       container.innerHTML = `
         <h1>${stage.title}</h1>
         <p>${stage.desc}</p>
-        <img src="${stage.img}" alt="${stage.title}">
+       
         <div class="button-container">
           ${stage.options.map(option => `<button onclick="render('${option.next}')">${option.text}</button>`).join("")}
         </div>
