@@ -51,7 +51,7 @@
       start: {
         title: "Cambrian Explosion",
         desc: "Life begins in the ocean. Strange multicellular creatures float, crawl, and hunt.",
-        img: "img/cambrian.jpg",
+        
         options: [
           { text: "Crawl along the sea floor", next: "segmented_creature" },
           { text: "Swim freely", next: "free_swimmer" }
@@ -60,7 +60,7 @@
       segmented_creature: {
         title: "Segmented Creature",
         desc: "You are a bottom-dwelling segmented organism, filtering food.",
-        img: "img/segmented.png",
+       
         options: [
           { text: "Develop hard shell", next: "arthropod" },
           { text: "Grow muscles to burrow", next: "worm" }
@@ -69,7 +69,7 @@
       free_swimmer: {
         title: "Free-Swimming Chordate",
         desc: "You develop a notochord, swimming with more control.",
-        img: "img/chordate.png",
+     
         options: [
           { text: "Grow a backbone", next: "fish" },
           { text: "Flatten body for stealth", next: "cephalopod" }
@@ -78,7 +78,7 @@
       arthropod: {
         title: "Marine Arthropod",
         desc: "You now have a jointed exoskeleton. Trilobite vibes!",
-        img: "img/arthropod.png",
+        
         options: [
           { text: "Leave water to scavenge", next: "land_arthropod" },
           { text: "Stay in ocean", next: "crustacean" }
@@ -87,7 +87,6 @@
       worm: {
         title: "Burrowing Worm",
         desc: "You dig deep and become an efficient detritus feeder.",
-        img: "img/worm.png",
         options: [
           { text: "Simplify body, specialize", next: "flatworm" },
           { text: "Gain segmentation", next: "annelid" }
@@ -96,19 +95,16 @@
       flatworm: {
         title: "Flatworm",
         desc: "You are simple and flat, thriving in your niche.",
-        img: "img/flatworm.png",
         options: [{ text: "Restart", next: "start" }]
       },
       annelid: {
         title: "Annelid Worm",
         desc: "Segmented and strong, you wiggle through the mud.",
-        img: "img/annelid.png",
         options: [{ text: "Restart", next: "start" }]
       },
       fish: {
         title: "Jawless Fish",
         desc: "You swim with a cartilaginous skeleton. Life is good.",
-        img: "img/fish.png",
         options: [
           { text: "Develop jaws and fins", next: "jawed_fish" },
           { text: "Stay jawless, filter feed", next: "lamprey" }
@@ -117,7 +113,6 @@
       cephalopod: {
         title: "Primitive Cephalopod",
         desc: "You are smart and fast. Tentacles emerge.",
-        img: "img/cephalopod.png",
         options: [
           { text: "Evolve shell for protection", next: "nautilus" },
           { text: "Lose shell, increase brain", next: "octopus" }
@@ -126,7 +121,6 @@
       land_arthropod: {
         title: "Land Arthropod",
         desc: "You scuttle across land, breathing air.",
-        img: "img/land_arthropod.png",
         options: [
           { text: "Grow wings", next: "insect" },
           { text: "Grow legs for climbing", next: "spider" }
@@ -135,7 +129,6 @@
       crustacean: {
         title: "Crustacean",
         desc: "You thrive in water with tough shells and pincers.",
-        img: "img/crustacean.png",
         options: [
           { text: "Become tiny and fast", next: "shrimp" },
           { text: "Grow armor and claws", next: "crab" }
@@ -144,7 +137,6 @@
       jawed_fish: {
         title: "Jawed Fish",
         desc: "You dominate oceans with your jaws and fins.",
-        img: "img/jawed_fish.png",
         options: [
           { text: "Develop lungs", next: "lobe_finned_fish" },
           { text: "Stay in open sea", next: "shark" }
@@ -153,7 +145,6 @@
       lamprey: {
         title: "Lamprey",
         desc: "You are a parasitic jawless fish.",
-        img: "img/lamprey.png",
         options: [
           { text: "Specialize in river life", next: "river_lamprey" },
           { text: "Adapt to deep sea", next: "deep_sea_lamprey" }
@@ -162,7 +153,6 @@
       lobe_finned_fish: {
         title: "Lobe-Finned Fish",
         desc: "You begin to explore shallow waters. Fins turn into proto-limbs.",
-        img: "img/lobe_finned_fish.png",
         options: [
           { text: "Crawl onto land", next: "amphibian" },
           { text: "Return to deeper water", next: "coelacanth" }
@@ -171,7 +161,6 @@
       amphibian: {
         title: "Early Amphibian",
         desc: "You can breathe air and live on land, but need water to breed.",
-        img: "img/amphibian.png",
         options: [
           { text: "Develop dry eggs", next: "reptile" },
           { text: "Stay near water", next: "frog" }
@@ -180,7 +169,6 @@
       reptile: {
         title: "Reptile",
         desc: "You lay eggs on land and bask in the sun.",
-        img: "img/reptile.png",
         options: [
           { text: "Grow feathers, climb trees", next: "bird" },
           { text: "Grow fur, stay warm", next: "mammal" }
@@ -189,7 +177,6 @@
       bird: {
         title: "Bird",
         desc: "You take to the skies, light and agile.",
-        img: "img/bird.png",
         options: [
           { text: "Fly high", next: "eagle" },
           { text: "Dive for fish", next: "penguin" }
@@ -198,7 +185,6 @@
       mammal: {
         title: "Small Mammal",
         desc: "You are warm-blooded, agile and fast-breeding.",
-        img: "img/mammal.png",
         options: [
           { text: "Climb trees", next: "primate" },
           { text: "Swim and hunt", next: "whale_ancestor" }
@@ -207,7 +193,6 @@
       whale_ancestor: {
         title: "Amphibious Mammal",
         desc: "You return to water. Evolution loops!",
-        img: "img/whale_ancestor.png",
         options: [
           { text: "Live in rivers", next: "river_dolphin" },
           { text: "Go to ocean", next: "whale" }
@@ -216,7 +201,6 @@
       primate: {
         title: "Primate",
         desc: "You swing through trees, social and smart.",
-        img: "img/primate.png",
         options: [
           { text: "Develop tools", next: "human" },
           { text: "Remain in forest", next: "chimp" }
