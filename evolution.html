@@ -19,7 +19,7 @@
       text-align: center;
     }
  
-    }
+    
     .button-container {
       display: flex;
       gap: 20px;
@@ -224,23 +224,21 @@
       deep_sea_lamprey: { title: "Deep Sea Lamprey 🌊🪱", desc: "You lurk in the abyss.", img: "img/deep_sea_lamprey.png", options: [{ text: "Restart", next: "start" }] }
     };
 
-    function render(stageKey) {
-      const stage = tree[stageKey];
-      const container = document.getElementById("game");
+    const gameContainer = document.getElementById("game");
 
-      container.innerHTML = `
-        <h1>${stage.title}</h1>
-        <p>${stage.desc}</p>
-               <>
+  function renderNode(nodeKey) {
+    const node = tree[nodeKey];
+    gameContainer.innerHTML = `
+      <h1>${node.title}</h1>
+      <p>${node.desc}</p>
+      <div class="button-container">
+        ${node.options.map(option => `<button onclick="renderNode('${option.next}')">${option.text}</button>`).join('')}
+      </div>
+    `;
+  }
 
-        <div class="button-container">
-          ${stage.options.map(option => `<button onclick="render('${option.next}')">${option.text}</button>`).join("")}
-        </div>
-      `;
-    }
-
-    // Start the game
-    render("start");
+  // Start the game
+  renderNode("start");
   </script>
 </body>
 </html>
