@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relativistic Space-Time Clock</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+    select {
+      padding: 0.5rem;
+      margin: 1rem;
+      font-size: 1rem;
+    }
+    .clocks {
+      display: flex;
+      gap: 2rem;
+      font-size: 1.2rem;
+    }
+    .clock {
+      border: 1px solid white;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+    }
+    .nano {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Relativistic Clock: Time is Relative</h1>
+  <label for="locationSelect">Choose a location in space:</label>
+  <select id="locationSelect">
+    <option value="earth">Earth (surface)</option>
+    <option value="iss">International Space Station</option>
+    <option value="mars">Mars Surface</option>
+    <option value="blackhole">Orbit near Black Hole</option>
+    <option value="neutron">Neutron Star Orbit</option>
+  </select>
+
+  <div class="clocks">
+    <div class="clock">
+      Earth Time:<br><span id="earthClock">00:00:00.000000000</span>
+    </div>
+    <div class="clock">
+      Relative Time:<br><span id="relClock">00:00:00.000000000</span>
+    </div>
+  </div>
+
+  <script>
+    const earthClock = document.getElementById('earthClock');
+    const relClock = document.getElementById('relClock');
+    const locationSelect = document.getElementById('locationSelect');
+
+    let startTime = performance.now();
+    let dilationFactor = 1.0; // Default: no dilation
+
+    const locations = {
+      earth: 1.0,
+      iss: 0.999999996, // very slight time gain
+      mars: 0.9999998,
+      blackhole: 0.00005, // time almost stops
+      neutron: 0.01
+    };
+
+    function formatFullTime(ms) {
+      const ns = Math.floor((ms % 1) * 1e6); // nanoseconds
+      const totalSec = Math.floor(ms / 1000);
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSec % 60).padStart(2, '0');
+      const msRemain = String(Math.floor(ms % 1000)).padStart(3, '0');
+      const nsRemain = String(ns).padStart(6, '0');
+      return `${h}:${m}:${s}.${msRemain}${nsRemain}`;
+    }
+
+    function updateClocks() {
+      const now = performance.now();
+      const earthElapsed = now - startTime;
+      const relElapsed = earthElapsed * dilationFactor;
+
+      earthClock.textContent = formatFullTime(earthElapsed);
+      relClock.textContent = formatFullTime(relElapsed);
+    }
+
+    locationSelect.addEventListener('change', () => {
+      const selected = locationSelect.value;
+      dilationFactor = locations[selected];
+    });
+
+    setInterval(updateClocks, 50);
+  </script>
+</body>
+</html>
