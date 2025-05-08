@@ -37,7 +37,7 @@
   <script>
     let scene, camera, renderer;
     let satellites = [];
-    let mode = 'sat'; // 'sat' or 'junk'
+    let mode = 'sat';
     const satGroup = new THREE.Group();
 
     init();
@@ -52,12 +52,21 @@
 
     function init() {
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 1000);
-      camera.position.z = 1;
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+      camera.position.z = 0;
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
       scene.add(satGroup);
+
+      // Add a wireframe sphere for visual reference
+      const geometry = new THREE.SphereGeometry(10, 32, 32);
+      const wireframe = new THREE.WireframeGeometry(geometry);
+      const line = new THREE.LineSegments(wireframe);
+      line.material.depthTest = false;
+      line.material.opacity = 0.2;
+      line.material.transparent = true;
+      scene.add(line);
 
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -81,7 +90,7 @@
       satGroup.clear();
       const url = mode === 'sat'
         ? 'https://celestrak.org/NORAD/elements/active.txt'
-        : 'https://celestrak.org/NORAD/elements/1999-025.txt'; // space junk
+        : 'https://celestrak.org/NORAD/elements/1999-025.txt';
 
       const response = await fetch(url);
       const tleData = await response.text();
@@ -96,6 +105,7 @@
           const satrec = satellite.twoline2satrec(line1, line2);
           satrecs.push({ name, satrec });
         } catch (err) {
+          console.warn('TLE parse error', name);
           continue;
         }
       }
@@ -108,20 +118,22 @@
         };
 
         const date = new Date();
+        const gmst = satellite.gstime(date);
+
         satrecs.forEach(({ name, satrec }) => {
           const positionAndVelocity = satellite.propagate(satrec, date);
           if (!positionAndVelocity.position) return;
 
-          const gmst = satellite.gstime(date);
-          const positionGd = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
+          const positionEcf = satellite.eciToEcf(positionAndVelocity.position, gmst);
+          const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
 
-          const azel = satellite.ecfToLookAngles(observerGd, satellite.eciToEcf(positionAndVelocity.position, gmst));
-
-          if (azel.elevation > 0) {
+          if (lookAngles.elevation > 0) {
             const radius = 10;
-            const x = radius * Math.cos(azel.azimuth) * Math.cos(azel.elevation);
-            const y = radius * Math.sin(azel.elevation);
-            const z = radius * Math.sin(azel.azimuth) * Math.cos(azel.elevation);
+            const az = lookAngles.azimuth;
+            const el = lookAngles.elevation;
+            const x = radius * Math.cos(az) * Math.cos(el);
+            const y = radius * Math.sin(el);
+            const z = radius * Math.sin(az) * Math.cos(el);
 
             const dot = new THREE.Mesh(
               new THREE.SphereGeometry(0.05),
@@ -136,6 +148,8 @@
             satGroup.add(label);
           }
         });
+      }, err => {
+        console.error('Geolocation error:', err);
       });
     }
 
