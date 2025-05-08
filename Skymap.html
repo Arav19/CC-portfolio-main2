@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Satellite Sky Viewer</title>
   <style>
     html, body {
@@ -34,7 +34,7 @@
       font-size: 14px;
       z-index: 10;
       white-space: pre-wrap;
-      max-width: 300px;
+      max-width: 200px;
     }
     canvas {
       display: block;
@@ -106,89 +106,71 @@
         ? 'https://celestrak.org/NORAD/elements/active.txt'
         : 'https://celestrak.org/NORAD/elements/1999-025.txt';
 
-      try {
-        const response = await fetch(url);
-        const tleData = await response.text();
-        const tleLines = tleData.split('\\n').filter(l => l.trim().length);
+      const response = await fetch(url);
+      const tleData = await response.text();
+      const tleLines = tleData.split('\n').filter(l => l.trim().length);
 
-        const satrecs = [];
-        let parseErrors = 0;
-        for (let i = 0; i < tleLines.length; i += 3) {
-          const name = tleLines[i];
-          const line1 = tleLines[i+1];
-          const line2 = tleLines[i+2];
-          try {
-            const satrec = satellite.twoline2satrec(line1, line2);
-            satrecs.push({ name, satrec });
-          } catch (err) {
-            console.warn('TLE parse error', name);
-            parseErrors++;
-            continue;
-          }
+      const satrecs = [];
+      for (let i = 0; i < tleLines.length; i += 3) {
+        const name = tleLines[i];
+        const line1 = tleLines[i+1];
+        const line2 = tleLines[i+2];
+        try {
+          const satrec = satellite.twoline2satrec(line1, line2);
+          satrecs.push({ name, satrec });
+        } catch (err) {
+          console.warn('TLE parse error', name);
+          continue;
         }
-
-        navigator.geolocation.getCurrentPosition(pos => {
-          const observerGd = {
-            longitude: satellite.degreesToRadians(pos.coords.longitude),
-            latitude: satellite.degreesToRadians(pos.coords.latitude),
-            height: 0.01
-          };
-
-          const date = new Date();
-          const gmst = satellite.gstime(date);
-          let shownCount = 0;
-          let totalProcessed = 0;
-          let propagationErrors = 0;
-
-          satrecs.forEach(({ name, satrec }) => {
-            totalProcessed++;
-            const positionAndVelocity = satellite.propagate(satrec, date);
-            if (!positionAndVelocity.position) {
-              propagationErrors++;
-              return;
-            }
-
-            const positionEcf = satellite.eciToEcf(positionAndVelocity.position, gmst);
-            const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
-
-            if (lookAngles.elevation > 0) {
-              const radius = 10;
-              const az = lookAngles.azimuth;
-              const el = lookAngles.elevation;
-              const x = radius * Math.cos(az) * Math.cos(el);
-              const y = radius * Math.sin(el);
-              const z = radius * Math.sin(az) * Math.cos(el);
-
-              const dot = new THREE.Mesh(
-                new THREE.SphereGeometry(0.05),
-                new THREE.MeshBasicMaterial({ color: 0x00ffff })
-              );
-              dot.position.set(x, y, z);
-
-              const label = makeLabel(name);
-              label.position.set(x, y - 0.3, z);
-
-              satGroup.add(dot);
-              satGroup.add(label);
-              shownCount++;
-            }
-          });
-
-          debugDiv.innerText = 
-            `Total TLEs: ${satrecs.length}
-Parsed successfully: ${satrecs.length - parseErrors}
-Parse errors: ${parseErrors}
-Total processed: ${totalProcessed}
-Propagation errors: ${propagationErrors}
-Satellites visible: ${shownCount}`;
-        }, err => {
-          console.error('Geolocation error:', err);
-          debugDiv.innerText = 'Geolocation error.';
-        });
-      } catch (error) {
-        console.error('Error fetching TLE data:', error);
-        debugDiv.innerText = 'Error fetching TLE data.';
       }
+
+      navigator.geolocation.getCurrentPosition(pos => {
+        const observerGd = {
+          longitude: satellite.degreesToRadians(pos.coords.longitude),
+          latitude: satellite.degreesToRadians(pos.coords.latitude),
+          height: 0.01
+        };
+
+        const date = new Date();
+        const gmst = satellite.gstime(date);
+        let shownCount = 0;
+
+        satrecs.forEach(({ name, satrec }) => {
+          const positionAndVelocity = satellite.propagate(satrec, date);
+          if (!positionAndVelocity.position) return;
+
+          const positionEcf = satellite.eciToEcf(positionAndVelocity.position, gmst);
+          const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
+
+          if (lookAngles.elevation > 0) {
+            const radius = 10;
+            const az = lookAngles.azimuth;
+            const el = lookAngles.elevation;
+            const x = radius * Math.cos(az) * Math.cos(el);
+            const y = radius * Math.sin(el);
+            const z = radius * Math.sin(az) * Math.cos(el);
+
+            const dot = new THREE.Mesh(
+              new THREE.SphereGeometry(0.05),
+              new THREE.MeshBasicMaterial({ color: 0x00ffff })
+            );
+            dot.position.set(x, y, z);
+
+            const label = makeLabel(name);
+            label.position.set(x, y - 0.3, z);
+
+            satGroup.add(dot);
+            satGroup.add(label);
+            shownCount++;
+          }
+        });
+
+        debugDiv.innerText = `${shownCount} satellites visible.`;
+
+      }, err => {
+        console.error('Geolocation error:', err);
+        debugDiv.innerText = 'Geolocation error.';
+      });
     }
 
     function makeLabel(text) {
