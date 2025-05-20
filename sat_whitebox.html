@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Satellite Sky Viewer - Prototype Intro</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 28px;
+    }
+    img {
+      width: 100%;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Satellite Sky Viewer</h1>
+
+  <p>
+    This is a web app that shows you all the satellites and space junk flying above you in real-time. 
+    You can move your phone around to look at the sky and see glowing dots where satellites are. 
+    You can also switch between satellites and debris to explore what’s above Earth.
+  </p>
+
+  <p>
+    I’m using the CelesTrak API to get live satellite data. With satellite.js, I calculate where each object is in the sky based on your location.
+    Then I use Three.js to create a 3D sky that you can explore by moving your phone.
+  </p>
+
+  <p><strong>Tech stack:</strong></p>
+  <ul>
+    <li>HTML, CSS, JavaScript</li>
+    <li>Three.js</li>
+    <li>satellite.js</li>
+    <li>CelesTrak API</li>
+    <li>DeviceOrientation API</li>
+  </ul>
+
+  <img src="mockup.png" alt="App mockup">
+
+</body>
+</html>
