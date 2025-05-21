@@ -2,115 +2,137 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Satellite Sky Viewer - Prototype</title>
+  <title>Satellite Visualizer Prototype</title>
   <style>
     body {
+      background-color: #111;
+      color: #fff;
       font-family: sans-serif;
-      background: #f0f0f0;
       margin: 0;
       padding: 20px;
     }
+
+    h1, h2 {
+      color: #fff;
+    }
+
     img {
-      width: 100%;
-      max-width: 600px;
-      display: block;
+      max-width: 100%;
       margin: 20px 0;
     }
-    #three-container {
+
+    #viewer {
       width: 100%;
       height: 400px;
       background: #000;
       margin-top: 40px;
     }
+
+    .label {
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+  <h1>Satellite Visualizer Web App</h1>
+  <p>This is a simple prototype of a web app that helps people see satellites flying above them in real-time using a 3D globe. I’m using the <strong>N2YO Satellite API</strong> to fetch live satellite positions based on the user’s location. The goal is to make space more accessible and visible, especially to people who may have never looked up at the stars with purpose before.</p>
 
-  <h1>Satellite Sky Viewer</h1>
-  <p>
-    This web app shows you satellites and debris in the sky above. I’m using the CelesTrak API to get real-time satellite data.
-    Then I use satellite.js and Three.js to calculate where everything is and place it into a 3D sky. You can move your phone or mouse to look around.
-  </p>
-  <img src="mockup.png" alt="Mockup">
+  <h2>What It Will Do</h2>
+  <ul>
+    <li>Show a 360° sky based on the user’s location</li>
+    <li>Plot visible satellites as floating points with labels</li>
+    <li>Update in real-time using live API data</li>
+  </ul>
 
-  <h2>Try a simple 360° view:</h2>
-  <div id="three-container"></div>
+  <h2>How I’ll Make It</h2>
+  <ul>
+    <li><strong>Frontend:</strong> HTML, CSS, JavaScript, Three.js</li>
+    <li><strong>API:</strong> N2YO Satellite Tracking API</li>
+    <li><strong>Data:</strong> User geolocation, satellite positions, names</li>
+  </ul>
+
+  <h2>Mockup</h2>
+  <img src="mockup.png" alt="Mockup image of the app layout" />
+
+  <h2>Sample 360° Satellite Grid</h2>
+  <p>This is a simple view showing a wireframe sky dome and 3 sample satellites (X, Y, Z) for testing.</p>
+
+  <div id="viewer"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.min.js"></script>
   <script>
-    const container = document.getElementById('three-container');
+    const container = document.getElementById('viewer');
 
-    // Scene and Camera
+    // Setup scene
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.z = 5;
-
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
+    camera.position.z = 5;
 
-    // Controls
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+    // Wireframe sphere
+    const sphereGeo = new THREE.SphereGeometry(3, 32, 32);
+    const sphereMat = new THREE.MeshBasicMaterial({
+      color: 0x4444ff,
+      wireframe: true,
+      opacity: 0.2,
+      transparent: true
+    });
+    const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+    scene.add(sphere);
 
-    // Background
-    scene.background = new THREE.Color(0x000022);
-
-    // Add satellites
-    function createSatellite(label, x, y, z) {
-      const geometry = new THREE.SphereGeometry(0.2, 16, 16);
-      const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-      const sat = new THREE.Mesh(geometry, material);
-      sat.position.set(x, y, z);
-      scene.add(sat);
+    // Create satellite markers
+    function addMarker(label, x, y, z) {
+      const markerGeo = new THREE.SphereGeometry(0.1, 8, 8);
+      const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      marker.position.set(x, y, z);
+      scene.add(marker);
 
       // Label
       const div = document.createElement('div');
-      div.style.position = 'absolute';
-      div.style.color = 'white';
-      div.style.fontSize = '12px';
+      div.className = 'label';
       div.innerText = label;
-      container.appendChild(div);
+      document.body.appendChild(div);
 
-      sat.userData.labelDiv = div;
-      return sat;
+      return { mesh: marker, labelDiv: div };
     }
 
-    const sats = [
-      createSatellite('X', 2, 0, 0),
-      createSatellite('Y', -1.5, 1, 1),
-      createSatellite('Z', 0, -2, -1.5)
+    const markers = [
+      addMarker('X', 3, 0, 0),
+      addMarker('Y', 0, 3, 0),
+      addMarker('Z', 0, 0, 3),
     ];
 
-    // Position labels
+    // Update label positions on screen
     function updateLabels() {
-      sats.forEach(sat => {
-        const vector = sat.position.clone().project(camera);
-        const x = (vector.x + 1) / 2 * container.clientWidth;
-        const y = -(vector.y - 1) / 2 * container.clientHeight;
-        sat.userData.labelDiv.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+      markers.forEach(obj => {
+        const vector = obj.mesh.position.clone().project(camera);
+        const x = (vector.x + 1) / 2 * window.innerWidth;
+        const y = -(vector.y - 1) / 2 * window.innerHeight;
+        obj.labelDiv.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
       });
     }
 
-    // Animation loop
+    // Render loop
     function animate() {
       requestAnimationFrame(animate);
-      controls.update();
       renderer.render(scene, camera);
       updateLabels();
     }
 
     animate();
 
-    // Resize handler
+    // Resize fix
     window.addEventListener('resize', () => {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
     });
   </script>
-
 </body>
 </html>
