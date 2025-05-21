@@ -10,6 +10,7 @@
       font-family: sans-serif;
       margin: 0;
       padding: 20px;
+      text-align: center;
     }
 
     h1, h2 {
@@ -17,15 +18,17 @@
     }
 
     img {
-      max-width: 100%;
-      margin: 20px 0;
+      max-width: 80%;
+      margin: 20px auto;
+      display: block;
     }
 
     #viewer {
-      width: 100%;
+      width: 80%;
       height: 400px;
+      margin: 40px auto;
       background: #000;
-      margin-top: 40px;
+      position: relative;
     }
 
     .label {
@@ -33,6 +36,17 @@
       color: white;
       font-size: 12px;
       pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li::before {
+      content: "• ";
+      color: #00f;
     }
   </style>
 </head>
@@ -66,7 +80,6 @@
   <script>
     const container = document.getElementById('viewer');
 
-    // Setup scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
@@ -74,7 +87,6 @@
     container.appendChild(renderer.domElement);
     camera.position.z = 5;
 
-    // Wireframe sphere
     const sphereGeo = new THREE.SphereGeometry(3, 32, 32);
     const sphereMat = new THREE.MeshBasicMaterial({
       color: 0x4444ff,
@@ -85,7 +97,6 @@
     const sphere = new THREE.Mesh(sphereGeo, sphereMat);
     scene.add(sphere);
 
-    // Create satellite markers
     function addMarker(label, x, y, z) {
       const markerGeo = new THREE.SphereGeometry(0.1, 8, 8);
       const markerMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
@@ -93,11 +104,10 @@
       marker.position.set(x, y, z);
       scene.add(marker);
 
-      // Label
       const div = document.createElement('div');
       div.className = 'label';
       div.innerText = label;
-      document.body.appendChild(div);
+      container.appendChild(div);
 
       return { mesh: marker, labelDiv: div };
     }
@@ -108,17 +118,16 @@
       addMarker('Z', 0, 0, 3),
     ];
 
-    // Update label positions on screen
     function updateLabels() {
       markers.forEach(obj => {
         const vector = obj.mesh.position.clone().project(camera);
-        const x = (vector.x + 1) / 2 * window.innerWidth;
-        const y = -(vector.y - 1) / 2 * window.innerHeight;
-        obj.labelDiv.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        const x = (vector.x + 1) / 2 * container.clientWidth;
+        const y = -(vector.y - 1) / 2 * container.clientHeight;
+        obj.labelDiv.style.left = `${x}px`;
+        obj.labelDiv.style.top = `${y}px`;
       });
     }
 
-    // Render loop
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
@@ -127,7 +136,6 @@
 
     animate();
 
-    // Resize fix
     window.addEventListener('resize', () => {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
