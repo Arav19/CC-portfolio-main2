@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gyro Sphere Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #infoBox {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      text-align: center;
+      padding: 1.5em 1em 1em;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+
+    #infoBox h1 {
+      margin: 0;
+      font-size: 2em;
+      color: #00ffff;
+    }
+
+    #infoBox h2 {
+      margin: 0.5em 0;
+      font-size: 1.2em;
+      font-weight: normal;
+    }
+
+    #infoBox p {
+      max-width: 600px;
+      margin: 0.5em auto 0;
+      font-size: 1em;
+      color: #ccc;
+    }
+
+    #calibrate {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 1em 2em;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="infoBox">
+    <h1>Gray-boxed Testing</h1>
+    <h2>Testing Three.js to create a skybox that can be viewed using user location and phone orientation</h2>
+    <p>
+      This prototype uses your phone’s built-in gyroscope and orientation sensors to let you look around inside a 3D sphere. 
+      Move your phone in different directions to explore the environment. 
+      Tap the button below to calibrate your position and begin viewing. <br><br>
+      <strong>Note:</strong> Please open this page on a mobile device to test the full functionality.
+    </p>
+  </div>
+
+  <button id="calibrate">Tap to Calibrate</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script>
+    let scene, camera, renderer;
+
+    scene = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 0);
+    scene.add(camera);
+
+    const geometry = new THREE.SphereGeometry(10, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true, side: THREE.BackSide });
+    const sphere = new THREE.Mesh(geometry, material);
+    scene.add(sphere);
+
+    let rawAlpha = 0, rawBeta = 0, rawGamma = 0;
+    let calibrated = false;
+    let calibrationOffset = new THREE.Quaternion();
+
+    let smoothAlpha = 0, smoothBeta = 0, smoothGamma = 0;
+
+    function handleOrientation(event) {
+      const alpha = event.alpha || 0;
+      const beta = event.beta || 0;
+      const gamma = event.gamma || 0;
+
+      const smoothing = 0.15;
+      smoothAlpha = smoothing * alpha + (1 - smoothing) * smoothAlpha;
+      smoothBeta = smoothing * beta + (1 - smoothing) * smoothBeta;
+      smoothGamma = smoothing * gamma + (1 - smoothing) * smoothGamma;
+
+      rawAlpha = smoothAlpha;
+      rawBeta = smoothBeta;
+      rawGamma = smoothGamma;
+    }
+
+    function eulerFromOrientation(alpha, beta, gamma) {
+      const _alpha = THREE.MathUtils.degToRad(alpha);
+      const _beta = THREE.MathUtils.degToRad(beta);
+      const _gamma = THREE.MathUtils.degToRad(gamma);
+
+      const euler = new THREE.Euler(_beta, _alpha, -_gamma, 'ZXY');
+      const deviceQuat = new THREE.Quaternion().setFromEuler(euler);
+
+      const correctionQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+      return deviceQuat.multiply(correctionQuat);
+    }
+
+    function calibrateNow() {
+      const quat = eulerFromOrientation(rawAlpha, rawBeta, rawGamma);
+      calibrationOffset = quat.clone().invert();
+      calibrated = true;
+      document.getElementById("calibrate").style.display = "none";
+    }
+
+    const button = document.getElementById("calibrate");
+    button.addEventListener("click", () => {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(state => {
+          if (state === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation);
+            calibrateNow();
+          }
+        }).catch(console.error);
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+        calibrateNow();
+      }
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (calibrated) {
+        const deviceQuat = eulerFromOrientation(rawAlpha, rawBeta, rawGamma);
+        const finalQuat = deviceQuat.multiply(calibrationOffset);
+        camera.quaternion.slerp(finalQuat, 0.05);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
